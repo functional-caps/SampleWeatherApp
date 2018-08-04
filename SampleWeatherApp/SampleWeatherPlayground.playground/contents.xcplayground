@@ -2,10 +2,16 @@
 <playground version='6.0' target-platform='ios' executeOnSourceChanges='false'>
     <pages>
         <page name='LiveView'/>
-        <page name='4. Algebraic Data Types'/>
+        <page name='1. Functions'/>
+        <page name='2. Side Effects'/>
+        <page name='3. UIKit Styling with Functions'/>
+        <page name='4. Algebraic Data Types — Algebra'/>
         <page name='5. HigherOrderFunction'/>
         <page name='6. Functional Setters'/>
         <page name='7. Setters and Key Paths'/>
         <page name='8. Getters and Key Paths'/>
+        <page name='9. Algebraic Data Types — Exponents'/>
+        <page name='10. A Tale of Two Flat-Maps'/>
+        <page name='11. Composition without Operators'/>
     </pages>
 </playground>

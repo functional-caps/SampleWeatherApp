@@ -1,52 +1,5 @@
 //: [Previous](@previous)
 
-precedencegroup ForwardApplication {
-  associativity: left
-}
-
-infix operator |>: ForwardApplication
-
-func |> <A, B>(a: A, f: (A) -> B) -> B {
-  return f(a)
-}
-
-precedencegroup ForwardComposition {
-  associativity: left
-  higherThan: ForwardApplication
-}
-
-infix operator >>>: ForwardComposition
-
-func >>> <A, B, C>(f: @escaping (A) -> B, g: @escaping (B) -> C) -> ((A) -> C) {
-  return { a in
-    g(f(a))
-  }
-}
-
-precedencegroup BackwardsComposition {
-  associativity: right
-}
-
-infix operator <<<: BackwardsComposition
-
-func <<< <A, B, C>(g: @escaping (B) -> C, f: @escaping (A) -> B) -> (A) -> C {
-  return { x in
-    g(f(x))
-  }
-}
-
-func curry<A, B, C>(_ f: @escaping (A, B) -> C) -> (A) -> (B) -> C {
-  return { a in { b in f(a, b) } }
-}
-
-func flip<A, B, C>(_ f: @escaping (A) -> (B) -> C) -> (B) -> (A) -> C {
-  return { b in { a in f(a)(b) } }
-}
-
-func zurry<A>(_ f: () -> A) -> A {
-  return f()
-}
-
 /*
 
  Exercise 1:

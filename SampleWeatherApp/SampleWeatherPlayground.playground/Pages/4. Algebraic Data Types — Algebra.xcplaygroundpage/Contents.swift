@@ -1,15 +1,5 @@
 //: [Previous](@previous)
 
-struct Pair<A, B> {
-  let a: A
-  let b: B
-}
-
-enum Either<A, B> {
-  case left(A)
-  case right(B)
-}
-
 /*
 
  Exercise 1:

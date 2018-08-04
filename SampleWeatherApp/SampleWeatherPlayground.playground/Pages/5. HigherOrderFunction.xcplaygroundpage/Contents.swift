@@ -1,17 +1,5 @@
 //: [Previous](@previous)
 
-func curry<A, B, C>(_ f: @escaping (A, B) -> C) -> (A) -> (B) -> C {
-  return { a in { b in f(a, b) } }
-}
-
-func flip<A, B, C>(_ f: @escaping (A) -> (B) -> C) -> (B) -> (A) -> C {
-  return { b in { a in f(a)(b) } }
-}
-
-func zurry<A>(_ f: () -> A) -> A {
-  return f()
-}
-
 /*
 
  Exercise 1:
@@ -162,33 +150,6 @@ let right = PseudoEither<Int, String>("2")
  Answer 7:
 
  */
-
-precedencegroup ForwardApplication {
-  associativity: left
-}
-
-infix operator |>: ForwardApplication
-
-func |> <A, B>(a: A, f: (A) -> B) -> B {
-  return f(a)
-}
-
-precedencegroup ForwardComposition {
-  associativity: left
-  higherThan: ForwardApplication
-}
-
-infix operator >>>: ForwardComposition
-
-func >>> <A, B, C>(f: @escaping (A) -> B, g: @escaping (B) -> C) -> ((A) -> C) {
-  return { a in
-    g(f(a))
-  }
-}
-
-func map<A, B>(_ f: @escaping (A) -> B) -> ([A]) -> [B] {
-  return { $0.map(f) }
-}
 
 func incr(a: Int) -> String {
   return "\(a + 1)"
