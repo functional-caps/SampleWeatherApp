@@ -1,5 +1,10 @@
 //: [Previous](@previous)
 
+struct User {
+    let id: Int
+    let email: String
+}
+
 /*
 
  Exercise 1:
@@ -8,8 +13,14 @@
 
  Answer 1:
 
-
  */
+
+// used already: map, reduce, filter, min, max, sorted
+
+^\User.email
+
+//???
+
 
 /*
 
@@ -21,8 +32,9 @@
 
  Answer 2:
 
-
  */
+
+//???
 
 /*
 
@@ -40,8 +52,26 @@
 
  Answer 3:
 
-
  */
+
+struct Food {
+    var name: String
+}
+
+struct Location {
+    var name: String
+}
+
+struct User2 {
+    var favoriteFoods: [Food]
+    var location: Location?
+    var name: String
+}
+
+
+let foodNameGetter = get(\User2.favoriteFoods) >>> (get(\Food.name) |> map)
+foodNameGetter
+
 
 /*
 
@@ -53,8 +83,11 @@
 
  Answer 4:
 
-
  */
+
+get(\User2.location) >>> (get(\Location.name) |> map)
+
+get(\User2.location?.name)
 
 /*
 
@@ -64,8 +97,24 @@
 
  Answer 5:
 
-
  */
+
+func success<Root, Value, Error>(
+    getter: @escaping (Root) -> Value)
+    -> (Result<Root, Error>)
+    -> Value? {
+        return { result -> Value? in
+            switch result {
+            case .success(let value):
+                return getter(value)
+            case .failure:
+                return nil
+            }
+        }
+}
+
+let result = Result<User, String>.success(User(id: 42, email: "a@b.c"))
+result |> (get(\User.email) |> success)
 
 /*
 
@@ -77,8 +126,13 @@
 
  Answer 6:
 
-
  */
+
+//struct EnumKeyPath<Root, Value>{
+//    init() {
+//
+//    }
+//}
 
 /*
 

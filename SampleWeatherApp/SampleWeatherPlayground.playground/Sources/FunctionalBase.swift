@@ -10,6 +10,11 @@ public enum Either<A, B> {
     case right(B)
 }
 
+public enum Result<Value, Error> {
+    case success(Value)
+    case failure(Error)
+}
+
 public func curry<A, B, C>(_ f: @escaping (A, B) -> C) -> (A) -> (B) -> C {
     return { a in { b in f(a, b) } }
 }
@@ -135,7 +140,7 @@ public func map<A, B>(_ f: @escaping (A) -> B) -> ([A]) -> [B] {
     return { $0.map(f) }
 }
 
-func filter<A>(_ p: @escaping (A) -> Bool) -> ([A]) -> [A] {
+public func filter<A>(_ p: @escaping (A) -> Bool) -> ([A]) -> [A] {
     return { $0.filter(p) }
 }
 
@@ -167,4 +172,53 @@ public func prop<Root, Value>(_ kp: WritableKeyPath<Root, Value>)
                 return copy
             }
         }
+}
+
+public func get<Root, Value>(_ kp: KeyPath<Root, Value>) -> (Root) -> Value {
+    return { root in
+        root[keyPath: kp]
+    }
+}
+
+public func their<Root, Value>(
+    _ f: @escaping (Root) -> Value,
+    _ g: @escaping (Value, Value) -> Bool
+    )
+    -> (Root, Root)
+    -> Bool {
+
+        return { g(f($0), f($1)) }
+}
+
+public func their<Root, Value: Comparable>(
+    _ f: @escaping (Root) -> Value
+    )
+    -> (Root, Root)
+    -> Bool {
+
+        return their(f, <)
+}
+
+public func combining<Root, Value>(
+    _ f: @escaping (Root) -> Value,
+    by g: @escaping (Value, Value) -> Value
+    )
+    -> (Value, Root)
+    -> Value {
+
+        return { value, root in
+            g(value, f(root)) }
+}
+
+prefix operator ^
+public prefix func ^ <Root, Value>(kp: KeyPath<Root, Value>) -> (Root) -> Value {
+    return get(kp)
+}
+
+public func with<A, B>(_ a: A, _ f: (A) -> B) -> B {
+    return f(a)
+}
+
+public func pipe<A, B, C>(_ f: @escaping (A) -> B, _ g: @escaping (B) -> C) -> (A) -> C {
+    return { g(f($0)) }
 }
