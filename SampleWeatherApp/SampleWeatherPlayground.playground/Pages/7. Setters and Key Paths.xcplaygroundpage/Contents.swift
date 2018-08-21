@@ -40,6 +40,8 @@ struct User {
 ["one" : 1, "two" : 2]
     |> (prop(\.["one"])) { _ in 42 }
 
+\[String: Int].["one"]
+
 // takes optional update
 prop(\[String: Int].["one"])
 
@@ -95,10 +97,11 @@ var user = User(
     name: "Krzysztof"
 )
 
-prop(\User.favoriteFoods)
-user.favoriteFoods.first?.name
 
-//???
+dump(
+user
+    |> (prop(\User.favoriteFoods[0].name)) { $0.uppercased() }
+)
 
 /*
 
@@ -110,6 +113,15 @@ user.favoriteFoods.first?.name
 
 
  */
+
+var userCopy = user
+userCopy
+    |> (mrop(\User.favoriteFoods[0].name)) { $0.uppercased() }
+
+dump(userCopy)
+
+//                  [Food] -> [Food] -> User -> User
+//[Food] -> Bool -> [Food] -> [Food]
 
 dump(
 user
@@ -133,43 +145,37 @@ enum Result<Value, Error> {
     case failure(Error)
 }
 
-func success<Value, Error>()
-    -> (@escaping (Value) -> Value)
+func success<Value, Error>(update: @escaping (Value) -> Value)
     -> (Result<Value, Error>)
     -> Result<Value, Error> {
-        return { update in
-            return { result in
-                switch result {
-                case .success(let val):
-                    return .success(update(val))
-                case .failure: return result
-                }
-            }
+    return { result in
+        switch result {
+        case .success(let val):
+            return .success(update(val))
+        case .failure: return result
         }
+    }
 }
 
-func failure<Value, Error>()
-    -> (@escaping (Error) -> Error)
+func failure<Value, Error>(update: @escaping (Error) -> Error)
     -> (Result<Value, Error>)
     -> Result<Value, Error> {
-        return { update in
-            return { result in
-                switch result {
-                case .success: return result
-                case .failure(let error): return .failure(update(error))
-                }
-            }
+    return { result in
+        switch result {
+        case .success: return result
+        case .failure(let error): return .failure(update(error))
         }
+    }
 }
 
 Result<Int, String>.success(42)
-    |> ((success()) { $0 * 2 })
-    |> ((success()) { $0 * 2 })
-    |> ((failure()) { $0.uppercased() })
+    |> (success { $0 * 2 })
+    |> (success { $0 * 2 })
+    |> (failure { $0.uppercased() })
 
 Result<Int, String>.failure("aaa")
-    |> ((success()) { $0 * 2 })
-    |> ((failure()) { $0.uppercased() })
+    |> (success { $0 * 2 })
+    |> (failure { $0.uppercased() })
 
 /*
 
@@ -216,15 +222,22 @@ func failure<Value, Error, Prop>(_ kp: WritableKeyPath<Error, Prop>)
         }
 }
 
-dump(
-Result<User, Location>.success(
-    User(favoriteFoods: [], location: Location(name: "Berlin"), name: "Krzysztof")
+let resultSuccess = Result<User, Location>.success(
+    User(favoriteFoods: [],
+         location: Location(name: "Berlin"),
+         name: "Krzysztof")
 )
+
+let resultFailure = Result<User, Location>
+    .failure(Location(name: "Warsaw"))
+
+dump(
+resultSuccess
     |> (success(\.name)) { _ in "Magda" }
 )
 
 dump(
-Result<User, Location>.failure(Location(name: "Warsaw"))
+resultFailure
     |> (failure(\.name)) { _ in "Paris" }
 )
 
@@ -239,17 +252,21 @@ Result<User, Location>.failure(Location(name: "Warsaw"))
  */
 
 public func propInout<Root, Value>(_ kp: WritableKeyPath<Root, Value>)
-    -> (@escaping (Value) -> Value)
+    -> (@escaping (inout Value) -> Void)
     -> (inout Root)
     -> Void {
         return { update in
             { root in
-                var copy = root
-                copy[keyPath: kp] = update(copy[keyPath: kp])
-                root = copy
+                update(&root[keyPath: kp])
             }
         }
 }
+
+var userInout = user
+userInout
+    |> (propInout(\User.favoriteFoods[0].name)) { $0 = "Burger" }
+
+dump(userInout)
 
 func elemInout<A: Hashable>(_ a: A)
     -> (@escaping (Bool) -> Bool)
@@ -259,19 +276,18 @@ func elemInout<A: Hashable>(_ a: A)
         return { set in
             let isInSet = set.contains(a)
             let shouldBeIncluded = checker(isInSet)
-            var copy = set
             switch (isInSet, shouldBeIncluded) {
             case (true, true), (false, false): break;
-            case (true, false): copy.remove(a)
-            case (false, true): copy.insert(a)
+            case (true, false): set.remove(a)
+            case (false, true): set.insert(a)
             }
-            set = copy
         }
     }
 }
 
 var copy = set
-((elemInout(6)) { !$0 })(&copy)
+copy
+    |> ((elemInout(2)) { !$0 })
 
 
 //: [Next](@next)

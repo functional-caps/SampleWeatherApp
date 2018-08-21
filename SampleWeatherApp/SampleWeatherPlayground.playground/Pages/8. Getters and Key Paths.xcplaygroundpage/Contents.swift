@@ -68,9 +68,19 @@ struct User2 {
     var name: String
 }
 
+//^\User2.favoriteFoods
 
-let foodNameGetter = get(\User2.favoriteFoods) >>> (get(\Food.name) |> map)
+//^\Food.name |> map
+//User -> [Food]
+//        [Food] -> [String]
+
+
+let foodNameGetter = ^\User2.favoriteFoods >>> (^\Food.name |> map)
 foodNameGetter
+
+let user = User2(favoriteFoods: [Food(name: "aaa")], location: nil, name: "test")
+user
+    |> ^\User2.favoriteFoods >>> (^\Food.name |> map)
 
 
 /*
@@ -128,11 +138,69 @@ result |> (get(\User.email) |> success)
 
  */
 
-//struct EnumKeyPath<Root, Value>{
-//    init() {
-//
-//    }
-//}
+struct EnumKeyPath<Root, Value>{
+    let getter: (Root) -> Value?
+    let setter: (Value) -> (Root) -> Root?
+
+    init(getter: @escaping (Root) -> Value?,
+         setter: @escaping (Value) -> (Root) -> Root?) {
+        self.getter = getter
+        self.setter = setter
+    }
+}
+
+extension EnumKeyPath {
+    static func success<E>() -> EnumKeyPath
+        where Root == Result<Value, E> {
+        return EnumKeyPath(
+            getter: { result in
+            switch result {
+            case .success(let value): return value
+            case .failure: return nil
+            }
+        }
+            , setter: { value in
+            return { result in
+                switch result {
+                case .success: return Result<Value, E>.success(value)
+                case .failure: return nil
+                }
+            }
+        }
+        )
+    }
+
+    static func failure<V>() -> EnumKeyPath where Root == Result<V, Value> {
+        return EnumKeyPath(
+            getter: { result in
+                switch result {
+                case .success: return nil
+                case .failure(let value): return value
+                }
+            },
+            setter: { value in
+                return { result in
+                    switch result {
+                    case .success: return nil
+                    case .failure(let value): return Result<V, Value>.failure(value)
+                    }
+                }
+            }
+        )
+    }
+}
+
+let successKp = EnumKeyPath<Result<Int, String>, Int>.success()
+
+let resultKp = Result<Int, String>.success(42)
+resultKp |> successKp.getter
+resultKp |> successKp.setter(24)
+
+let failureKp = EnumKeyPath<Result<Int, String>, String>.failure()
+
+let resultKp2 = Result<Int, String>.failure("42")
+resultKp2 |> failureKp.getter
+resultKp2 |> failureKp.setter("24")
 
 /*
 
@@ -142,8 +210,21 @@ result |> (get(\User.email) |> success)
 
  Answer 7:
 
-
  */
+
+let kp1 = EnumKeyPath<Result<Result<Int, String>, Double>, Result<Int, String>>.success()
+let kp2 = EnumKeyPath<Result<Int, String>, Int>.success()
+
+
+// Result<Result<Int, String>, Double> -> Result<Int, String>?
+
+kp1.getter >>> (kp2.getter |> map)
+// Result<Int, String> -> Int? -> Result<Int, String>? -> Int??
+
+
+// Result<Int, String> -> Int?
+
+(SampleWeatherPlayground_Sources.Result<SampleWeatherPlayground_Sources.Result<Int, String>, Double>) -> Optional<Optional<Int>>
 
 /*
 

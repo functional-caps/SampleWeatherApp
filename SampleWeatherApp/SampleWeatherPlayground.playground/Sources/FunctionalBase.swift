@@ -174,6 +174,19 @@ public func prop<Root, Value>(_ kp: WritableKeyPath<Root, Value>)
         }
 }
 
+public func mrop<Root, Value>(_ kp: WritableKeyPath<Root, Value>)
+    -> (@escaping (Value) -> Value)
+    -> (inout Root)
+    -> Void {
+        return { update in
+            return { root in
+                var copy = root
+                copy[keyPath: kp] = update(copy[keyPath: kp])
+                root = copy
+            }
+        }
+}
+
 public func get<Root, Value>(_ kp: KeyPath<Root, Value>) -> (Root) -> Value {
     return { root in
         root[keyPath: kp]
