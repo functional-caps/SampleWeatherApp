@@ -222,3 +222,11 @@ public func with<A, B>(_ a: A, _ f: (A) -> B) -> B {
 public func pipe<A, B, C>(_ f: @escaping (A) -> B, _ g: @escaping (B) -> C) -> (A) -> C {
     return { g(f($0)) }
 }
+
+public struct Tagged<Tag, RawValue> {
+    public let rawValue: RawValue
+
+    public init(rawValue: RawValue) {
+        self.rawValue = rawValue
+    }
+}

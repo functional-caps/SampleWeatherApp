@@ -13,5 +13,10 @@
         <page name='9. Algebraic Data Types — Exponents'/>
         <page name='10. A Tale of Two Flat-Maps'/>
         <page name='11. Composition without Operators'/>
+        <page name='12. Tagged'/>
+        <page name='13. Many Faces of Map'/>
+        <page name='14. Contravariance'/>
+        <page name='15. Setters — Ergonomics and Performance'/>
+        <page name='16. Dependency Injection Made Easy'/>
     </pages>
 </playground>
