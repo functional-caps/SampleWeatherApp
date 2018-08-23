@@ -1,0 +1,761 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		46F1F745212EBE6900608376 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46F1F744212EBE6900608376 /* AppDelegate.swift */; };
+		46F1F74C212EBE6D00608376 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 46F1F74B212EBE6D00608376 /* Assets.xcassets */; };
+		46F1F74F212EBE6D00608376 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46F1F74D212EBE6D00608376 /* LaunchScreen.storyboard */; };
+		46F1F75A212EBE6D00608376 /* ReposTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46F1F759212EBE6D00608376 /* ReposTests.swift */; };
+		46F1F776212EC10E00608376 /* ReposKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46F1F76D212EC10E00608376 /* ReposKit.framework */; };
+		46F1F77D212EC10E00608376 /* ReposKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46F1F77C212EC10E00608376 /* ReposKitTests.swift */; };
+		46F1F782212EC10E00608376 /* ReposKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46F1F76D212EC10E00608376 /* ReposKit.framework */; };
+		46F1F783212EC10E00608376 /* ReposKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 46F1F76D212EC10E00608376 /* ReposKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		46F1F78B212EC11400608376 /* ReposViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46F1F766212EBF0F00608376 /* ReposViewController.swift */; };
+		46F1F78C212EC11700608376 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46F1F764212EBE9500608376 /* Model.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		46F1F756212EBE6D00608376 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F1F739212EBE6900608376 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 46F1F740212EBE6900608376;
+			remoteInfo = Repos;
+		};
+		46F1F777212EC10E00608376 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F1F739212EBE6900608376 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 46F1F76C212EC10E00608376;
+			remoteInfo = ReposKit;
+		};
+		46F1F779212EC10E00608376 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F1F739212EBE6900608376 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 46F1F740212EBE6900608376;
+			remoteInfo = Repos;
+		};
+		46F1F780212EC10E00608376 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F1F739212EBE6900608376 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 46F1F76C212EC10E00608376;
+			remoteInfo = ReposKit;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		46F1F787212EC10E00608376 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				46F1F783212EC10E00608376 /* ReposKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		46F1F741212EBE6900608376 /* Repos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Repos.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		46F1F744212EBE6900608376 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		46F1F74B212EBE6D00608376 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		46F1F74E212EBE6D00608376 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		46F1F750212EBE6D00608376 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		46F1F755212EBE6D00608376 /* ReposTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReposTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		46F1F759212EBE6D00608376 /* ReposTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReposTests.swift; sourceTree = "<group>"; };
+		46F1F75B212EBE6D00608376 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		46F1F764212EBE9500608376 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		46F1F766212EBF0F00608376 /* ReposViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReposViewController.swift; sourceTree = "<group>"; };
+		46F1F76D212EC10E00608376 /* ReposKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReposKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		46F1F770212EC10E00608376 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		46F1F775212EC10E00608376 /* ReposKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReposKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		46F1F77C212EC10E00608376 /* ReposKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReposKitTests.swift; sourceTree = "<group>"; };
+		46F1F77E212EC10E00608376 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		46F1F78D212EC24400608376 /* Repos.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Repos.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		46F1F73E212EBE6900608376 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46F1F782212EC10E00608376 /* ReposKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46F1F752212EBE6D00608376 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46F1F769212EC10E00608376 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46F1F772212EC10E00608376 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46F1F776212EC10E00608376 /* ReposKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		46F1F738212EBE6900608376 = {
+			isa = PBXGroup;
+			children = (
+				46F1F78D212EC24400608376 /* Repos.playground */,
+				46F1F743212EBE6900608376 /* Repos */,
+				46F1F758212EBE6D00608376 /* ReposTests */,
+				46F1F76E212EC10E00608376 /* ReposKit */,
+				46F1F77B212EC10E00608376 /* ReposKitTests */,
+				46F1F742212EBE6900608376 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		46F1F742212EBE6900608376 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				46F1F741212EBE6900608376 /* Repos.app */,
+				46F1F755212EBE6D00608376 /* ReposTests.xctest */,
+				46F1F76D212EC10E00608376 /* ReposKit.framework */,
+				46F1F775212EC10E00608376 /* ReposKitTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		46F1F743212EBE6900608376 /* Repos */ = {
+			isa = PBXGroup;
+			children = (
+				46F1F744212EBE6900608376 /* AppDelegate.swift */,
+				46F1F74B212EBE6D00608376 /* Assets.xcassets */,
+				46F1F74D212EBE6D00608376 /* LaunchScreen.storyboard */,
+				46F1F750212EBE6D00608376 /* Info.plist */,
+			);
+			path = Repos;
+			sourceTree = "<group>";
+		};
+		46F1F758212EBE6D00608376 /* ReposTests */ = {
+			isa = PBXGroup;
+			children = (
+				46F1F759212EBE6D00608376 /* ReposTests.swift */,
+				46F1F75B212EBE6D00608376 /* Info.plist */,
+			);
+			path = ReposTests;
+			sourceTree = "<group>";
+		};
+		46F1F76E212EC10E00608376 /* ReposKit */ = {
+			isa = PBXGroup;
+			children = (
+				46F1F766212EBF0F00608376 /* ReposViewController.swift */,
+				46F1F764212EBE9500608376 /* Model.swift */,
+				46F1F770212EC10E00608376 /* Info.plist */,
+			);
+			path = ReposKit;
+			sourceTree = "<group>";
+		};
+		46F1F77B212EC10E00608376 /* ReposKitTests */ = {
+			isa = PBXGroup;
+			children = (
+				46F1F77C212EC10E00608376 /* ReposKitTests.swift */,
+				46F1F77E212EC10E00608376 /* Info.plist */,
+			);
+			path = ReposKitTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		46F1F76A212EC10E00608376 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		46F1F740212EBE6900608376 /* Repos */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46F1F75E212EBE6D00608376 /* Build configuration list for PBXNativeTarget "Repos" */;
+			buildPhases = (
+				46F1F73D212EBE6900608376 /* Sources */,
+				46F1F73E212EBE6900608376 /* Frameworks */,
+				46F1F73F212EBE6900608376 /* Resources */,
+				46F1F787212EC10E00608376 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				46F1F781212EC10E00608376 /* PBXTargetDependency */,
+			);
+			name = Repos;
+			productName = Repos;
+			productReference = 46F1F741212EBE6900608376 /* Repos.app */;
+			productType = "com.apple.product-type.application";
+		};
+		46F1F754212EBE6D00608376 /* ReposTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46F1F761212EBE6D00608376 /* Build configuration list for PBXNativeTarget "ReposTests" */;
+			buildPhases = (
+				46F1F751212EBE6D00608376 /* Sources */,
+				46F1F752212EBE6D00608376 /* Frameworks */,
+				46F1F753212EBE6D00608376 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				46F1F757212EBE6D00608376 /* PBXTargetDependency */,
+			);
+			name = ReposTests;
+			productName = ReposTests;
+			productReference = 46F1F755212EBE6D00608376 /* ReposTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		46F1F76C212EC10E00608376 /* ReposKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46F1F784212EC10E00608376 /* Build configuration list for PBXNativeTarget "ReposKit" */;
+			buildPhases = (
+				46F1F768212EC10E00608376 /* Sources */,
+				46F1F769212EC10E00608376 /* Frameworks */,
+				46F1F76A212EC10E00608376 /* Headers */,
+				46F1F76B212EC10E00608376 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ReposKit;
+			productName = ReposKit;
+			productReference = 46F1F76D212EC10E00608376 /* ReposKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		46F1F774212EC10E00608376 /* ReposKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46F1F788212EC10E00608376 /* Build configuration list for PBXNativeTarget "ReposKitTests" */;
+			buildPhases = (
+				46F1F771212EC10E00608376 /* Sources */,
+				46F1F772212EC10E00608376 /* Frameworks */,
+				46F1F773212EC10E00608376 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				46F1F778212EC10E00608376 /* PBXTargetDependency */,
+				46F1F77A212EC10E00608376 /* PBXTargetDependency */,
+			);
+			name = ReposKitTests;
+			productName = ReposKitTests;
+			productReference = 46F1F775212EC10E00608376 /* ReposKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F1F739212EBE6900608376 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0940;
+				LastUpgradeCheck = 0940;
+				ORGANIZATIONNAME = "Krzysztof Siejkowski";
+				TargetAttributes = {
+					46F1F740212EBE6900608376 = {
+						CreatedOnToolsVersion = 9.4;
+					};
+					46F1F754212EBE6D00608376 = {
+						CreatedOnToolsVersion = 9.4;
+						TestTargetID = 46F1F740212EBE6900608376;
+					};
+					46F1F76C212EC10E00608376 = {
+						CreatedOnToolsVersion = 9.4;
+					};
+					46F1F774212EC10E00608376 = {
+						CreatedOnToolsVersion = 9.4;
+						TestTargetID = 46F1F740212EBE6900608376;
+					};
+				};
+			};
+			buildConfigurationList = 46F1F73C212EBE6900608376 /* Build configuration list for PBXProject "Repos" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 46F1F738212EBE6900608376;
+			productRefGroup = 46F1F742212EBE6900608376 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				46F1F740212EBE6900608376 /* Repos */,
+				46F1F754212EBE6D00608376 /* ReposTests */,
+				46F1F76C212EC10E00608376 /* ReposKit */,
+				46F1F774212EC10E00608376 /* ReposKitTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		46F1F73F212EBE6900608376 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46F1F74F212EBE6D00608376 /* LaunchScreen.storyboard in Resources */,
+				46F1F74C212EBE6D00608376 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46F1F753212EBE6D00608376 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46F1F76B212EC10E00608376 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46F1F773212EC10E00608376 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		46F1F73D212EBE6900608376 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46F1F745212EBE6900608376 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46F1F751212EBE6D00608376 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46F1F75A212EBE6D00608376 /* ReposTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46F1F768212EC10E00608376 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46F1F78B212EC11400608376 /* ReposViewController.swift in Sources */,
+				46F1F78C212EC11700608376 /* Model.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46F1F771212EC10E00608376 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46F1F77D212EC10E00608376 /* ReposKitTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		46F1F757212EBE6D00608376 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 46F1F740212EBE6900608376 /* Repos */;
+			targetProxy = 46F1F756212EBE6D00608376 /* PBXContainerItemProxy */;
+		};
+		46F1F778212EC10E00608376 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 46F1F76C212EC10E00608376 /* ReposKit */;
+			targetProxy = 46F1F777212EC10E00608376 /* PBXContainerItemProxy */;
+		};
+		46F1F77A212EC10E00608376 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 46F1F740212EBE6900608376 /* Repos */;
+			targetProxy = 46F1F779212EC10E00608376 /* PBXContainerItemProxy */;
+		};
+		46F1F781212EC10E00608376 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 46F1F76C212EC10E00608376 /* ReposKit */;
+			targetProxy = 46F1F780212EC10E00608376 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		46F1F74D212EBE6D00608376 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				46F1F74E212EBE6D00608376 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		46F1F75C212EBE6D00608376 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		46F1F75D212EBE6D00608376 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		46F1F75F212EBE6D00608376 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D55QK79K95;
+				INFOPLIST_FILE = Repos/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.siejkowski.pointfree.Repos;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		46F1F760212EBE6D00608376 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D55QK79K95;
+				INFOPLIST_FILE = Repos/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.siejkowski.pointfree.Repos;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		46F1F762212EBE6D00608376 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D55QK79K95;
+				INFOPLIST_FILE = ReposTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.siejkowski.pointfree.ReposTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Repos.app/Repos";
+			};
+			name = Debug;
+		};
+		46F1F763212EBE6D00608376 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D55QK79K95;
+				INFOPLIST_FILE = ReposTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.siejkowski.pointfree.ReposTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Repos.app/Repos";
+			};
+			name = Release;
+		};
+		46F1F785212EC10E00608376 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = D55QK79K95;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = ReposKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.siejkowski.pointfree.ReposKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		46F1F786212EC10E00608376 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = D55QK79K95;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = ReposKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.siejkowski.pointfree.ReposKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		46F1F789212EC10E00608376 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D55QK79K95;
+				INFOPLIST_FILE = ReposKitTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.siejkowski.pointfree.ReposKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Repos.app/Repos";
+			};
+			name = Debug;
+		};
+		46F1F78A212EC10E00608376 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D55QK79K95;
+				INFOPLIST_FILE = ReposKitTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.siejkowski.pointfree.ReposKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Repos.app/Repos";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		46F1F73C212EBE6900608376 /* Build configuration list for PBXProject "Repos" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46F1F75C212EBE6D00608376 /* Debug */,
+				46F1F75D212EBE6D00608376 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		46F1F75E212EBE6D00608376 /* Build configuration list for PBXNativeTarget "Repos" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46F1F75F212EBE6D00608376 /* Debug */,
+				46F1F760212EBE6D00608376 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		46F1F761212EBE6D00608376 /* Build configuration list for PBXNativeTarget "ReposTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46F1F762212EBE6D00608376 /* Debug */,
+				46F1F763212EBE6D00608376 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		46F1F784212EC10E00608376 /* Build configuration list for PBXNativeTarget "ReposKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46F1F785212EC10E00608376 /* Debug */,
+				46F1F786212EC10E00608376 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		46F1F788212EC10E00608376 /* Build configuration list for PBXNativeTarget "ReposKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46F1F789212EC10E00608376 /* Debug */,
+				46F1F78A212EC10E00608376 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 46F1F739212EBE6900608376 /* Project object */;
+}
