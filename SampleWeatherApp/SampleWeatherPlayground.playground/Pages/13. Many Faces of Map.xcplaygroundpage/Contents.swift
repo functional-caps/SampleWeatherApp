@@ -128,13 +128,16 @@ struct PredicateSet<A> {
     let contains: (A) -> Bool
 }
 
-//func map(_ f: @escaping (A) -> B) -> (PredicateSet<A>) -> PredicateSet<B> {
-//    return { (set: PredicateSet<A>) in
-//        let contains = set.contains // (A) -> Bool
-//        f // (A) -> B
-//        // cannot compose
-//    }
-//}
+func map(_ f: @escaping (A) -> B) -> (PredicateSet<A>) -> PredicateSet<B> {
+    return { (set: PredicateSet<A>) -> Predicate<B> in
+        // given:
+        // (A) -> Bool
+        // (A) -> B
+        // obtain:
+        // B -> Bool
+        // cannot compose
+    }
+}
 
 /*
 

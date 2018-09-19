@@ -195,9 +195,16 @@ enum OffType: OnOffType {}
 
 typealias Light<A> = Tagged<A, UIColor> where A: OnOffType
 
+func retag<A, B, Value>(_ newTag: B.Type) -> (Tagged<A, Value>) -> Tagged<B, Value> {
+    return { tag in
+        return Tagged<B, Value>(rawValue: tag.rawValue)
+    }
+}
+
+
 extension Light where Tag == OffType, RawValue == UIColor {
     func turnOn() -> Light<OnType> {
-        return Light<OnType>(rawValue: rawValue)
+        return self |> retag(OnType.self)
     }
 }
 

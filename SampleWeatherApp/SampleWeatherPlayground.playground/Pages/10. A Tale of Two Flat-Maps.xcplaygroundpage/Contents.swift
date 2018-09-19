@@ -99,6 +99,20 @@ extension Dictionary {
     }
 }
 
+func filterMapValues<Key, A, B>(
+    _ f: @escaping (A) -> B?
+    ) -> ([Key: A]) -> [Key: B] {
+    return { dict in
+        var result = [Key: B]()
+        for (key, value) in dict {
+            if let b = f(value) {
+                result[key] = b
+            }
+        }
+        return result
+    }
+}
+
 /*
 
  Exercise 5:
@@ -108,6 +122,8 @@ extension Dictionary {
  Answer 5:
 
  */
+
+// (A + B)^Value
 
 extension Dictionary {
     func partitionMapValue<A, B>(_ f: (Value) -> Either<A, B>) -> (left: [Key: A], right: [Key: B]) {
@@ -175,16 +191,33 @@ extension Array {
  */
 
 extension Either {
+
+    func filter(
+        _ transformA: (A) -> Bool,
+        _ transformB: (B) -> Bool
+        ) -> Either<Either<A, B>, Either<A, B>>  {
+        let result: Either<Either<A, B>, Either<A, B>>
+        switch self {
+        case .left(let a):
+            if transformA(a) {
+                return .left(self)
+            }
+        case .right(let b):
+            if transformB(b) {
+                return .right(self)
+            }
+        }
+        return either
+    }
+
     func partitionMap<C, D>(
         _ transformA: (A) -> Either<C, D>,
         _ transformB: (B) -> Either<C, D>
     ) -> Either<C, D> {
-        let either: Either<C, D>
         switch self {
-        case .left(let a): either = transformA(a)
-        case .right(let b): either = transformB(b)
+        case .left(let a): return transformA(a)
+        case .right(let b): return transformB(b)
         }
-        return either
     }
 }
 

@@ -24,13 +24,13 @@ class ReferenceTester {
     }
 }
 
-typealias ReferenceSetter<S, A> = (@escaping (A) -> A) -> (S) -> Void where A: AnyObject, S: AnyObject
+typealias ReferenceSetter<S, A> = (@escaping (A) -> A) -> (S) -> Void where A: AnyObject
 
 func rver<S, A>(
     _ setter: ReferenceSetter<S, A>,
     _ set: @escaping (A) -> A
     )
-    -> (S) -> Void where A: AnyObject, S: AnyObject {
+    -> (S) -> Void where A: AnyObject {
     return setter(set)
 }
 
@@ -38,7 +38,7 @@ func rut<S, A>(
     _ setter: ReferenceSetter<S, A>,
     _ value: A
     )
-    -> (S) -> Void where A: AnyObject, S: AnyObject {
+    -> (S) -> Void where A: AnyObject {
     return rver(setter) { _ in value }
 }
 
@@ -46,7 +46,7 @@ prefix func ^ <Root, Value>(
     _ kp: ReferenceWritableKeyPath<Root, Value>
     )
     -> (@escaping (Value) -> Value)
-    -> (Root) -> Void where Root: AnyObject, Value: AnyObject {
+    -> (Root) -> Void where Value: AnyObject {
 
     return { (update: @escaping (Value) -> Value) in
         return { (root: Root) in
@@ -86,7 +86,8 @@ dump(test)
 
  */
 
-typealias SingleSetter<Root, Value> = (@escaping (Value) -> Value) -> (Root) -> Root
+typealias SingleSetter<Root, Value> =
+    Setter<Root, Root, Value, Value>
 
 func concat<Root, Value>(lhs: @escaping SingleSetter<Root, Value>,
                          rhs: @escaping SingleSetter<Root, Value>

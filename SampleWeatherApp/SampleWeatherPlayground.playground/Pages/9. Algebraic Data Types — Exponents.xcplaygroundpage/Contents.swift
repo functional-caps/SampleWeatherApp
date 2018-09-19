@@ -168,6 +168,8 @@ func s(_ value: Int) -> Bool {
 
  */
 
+// A ^ (B + C) == A ^ B * A ^ C
+
  func to<A, B, C>(_ f: @escaping (Either<B, C>) -> A) -> ((B) -> A, (C) -> A) {
     return (
         { b in f(Either<B, C>.left(b)) },
@@ -201,6 +203,21 @@ func s(_ value: Int) -> Bool {
  Answer 8:
 
  */
+
+// (A * B) ^ C == A ^ C * B ^ C
+
+struct S {
+    let a: Int
+    let b: Int
+
+    func foo() {}
+}
+
+// S == Int * Int
+func foo(s: S) {}
+
+// Int * Int
+func foo(a: Int, b: Int) {}
 
  func to<A, B, C>(_ f: @escaping (C) -> (A, B)) -> ((C) -> A, (C) -> B) {
      return (

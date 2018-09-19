@@ -12,8 +12,8 @@
 
 /*
  (A) -> ((B) -> C)
-        |___|  |__|
-          -1    +1
+        |__|  |__|
+         -1    +1
 |___|  |__________|
  -1         +1
 
@@ -88,8 +88,6 @@ struct Setter<A, B, S, T> {
     let set: (@escaping (A) -> B) -> (S) -> T
 }
 
-// SOMETHING IS WRONG HERE
-
 func map<A, B, S, T, C>(_ f: @escaping (A) -> C) -> (Setter<A, B, S, T>) -> Setter<C, B, S, T> {
     return { (setter: Setter<A, B, S, T>) in
         Setter { (cb: @escaping (C) -> B) in
@@ -116,7 +114,9 @@ func contramap<A, B, S, T, C>(_ f: @escaping (C) -> S) -> (Setter<A, B, S, T>) -
 
 func map<A, B, S, T, C>(_ f: @escaping (T) -> C) -> (Setter<A, B, S, T>) -> Setter<A, B, S, C> {
     return { (setter: Setter<A, B, S, T>) in
-        Setter { (ab: @escaping (A) -> B) in setter.set(ab) >>> f }
+        Setter { (ab: @escaping (A) -> B) in
+            setter.set(ab) >>> f
+        }
     }
 }
 
@@ -160,10 +160,10 @@ func invert<A>(set: PredicateSet<A>) -> PredicateSet<A> {
 
  Answer 5:
 
- */
+*/
 
 // 1)
-let powersOf2 = PredicateSet<Int> { $0.nonzeroBitCount == 1 }
+let powersOf2 = PredicateSet<Int> { $0.nonzeroBitCount == 1 && $0 != 1 }
 
 powersOf2.contains(-2)
 powersOf2.contains(3)
@@ -267,7 +267,7 @@ struct Dict<Key, Value> {
 
 func contramap<Key, Value, A>(_ f: @escaping (A) -> Key) -> (Dict<Key, Value>) -> Dict<A, Value> {
     return { dict in
-        Dict(contains: f >>> dict.contains)
+        Dict(contains: dict.contains <<< f)
     }
 }
 
@@ -315,10 +315,11 @@ decimalDigits.contains("2")
 -1       +1
 */
 
-func map<A, B, C>(_ f: @escaping (A) -> C) -> (@escaping (B) -> (A, A)) -> ((B) -> (C, C)) {
-    let f2: ((A, A)) -> (C, C) = { (f($0.0), f($0.1)) }
+func map<A, B, C>(
+    _ f: @escaping ((A, A)) -> (C, C)
+    ) -> (@escaping (B) -> (A, A)) -> ((B) -> (C, C)) {
     return { (baa: @escaping (B) -> (A, A)) in
-        baa >>> f2
+        baa >>> f
     }
 }
 
@@ -329,10 +330,11 @@ func map<A, B, C>(_ f: @escaping (A) -> C) -> (@escaping (B) -> (A, A)) -> ((B) 
    -1     +1
  */
 
-func contramap<A, B, C>(_ f: @escaping (C) -> A) -> (@escaping ((A, A)) -> B) -> (((C, C)) -> B) {
-    let f2: ((C, C)) -> (A, A) = { (f($0.0), f($0.1)) }
+func contramap<A, B, C>(
+    _ f: @escaping ((C, C)) -> (A, A)
+    ) -> (@escaping ((A, A)) -> B) -> (((C, C)) -> B) {
     return { (aab: @escaping ((A, A)) -> B) in
-        f2 >>> aab
+        f >>> aab
     }
 }
 
@@ -354,7 +356,10 @@ struct Endo<A> { let apply: (A) -> A }
 
 // 4)
 
-func imap<A, B>(_ f: @escaping (B) -> A, _ g: @escaping (A) -> B) -> (Endo<A>) -> Endo<B> {
+func imap<A, B>(
+    _ f: @escaping (B) -> A,
+    _ g: @escaping (A) -> B
+    ) -> (Endo<A>) -> Endo<B> {
     return { endo in Endo(apply: f >>> endo.apply >>> g) }
 }
 

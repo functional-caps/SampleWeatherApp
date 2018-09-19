@@ -20,5 +20,68 @@
 
  */
 
+/*
+
+ A.foo()
+ A.bar()
+ A.baz()
+
+ X.bar()
+
+ 1) od góry:
+
+ protocol X { func bar() }
+ extension A: X {}
+
+
+ 2) od dołu:
+
+ class X : A {
+     func foo() { noop() }
+     func bar() { super.bar }
+     func baz() { noop() }
+ }
+
+
+ 3) przez dodanie scope:
+
+ struct X {
+     private let a: A
+     func bar() { a.bar }
+ }
+
+ X(a: a)
+
+
+ 4) przez odjęcie scope:
+
+ Tagged<A, () -> Void>
+
+ struct Tagged2<Tag, A, B> {
+     let a: A
+     let b: B
+ }
+
+ typealias XBar = () -> Void
+ let xbar: XBar = A.bar
+
+
+ 5) przez transformatę scope:
+
+ struct X1<A, B> {
+     private let f: (A) -> B
+ }
+
+ X1(f: a.bar)
+
+ struct X2<A, B, C, D> {
+     private let f1: (A) -> B
+     private let f2: (C) -> D
+ }
+
+ X2(f1: a.bar, f2: a.foo)
+
+ */
+
 
 //: [Next](@next)
