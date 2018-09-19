@@ -18,5 +18,11 @@
         <page name='14. Contravariance'/>
         <page name='15. Setters — Ergonomics and Performance'/>
         <page name='16. Dependency Injection Made Easy'/>
+        <page name='17. Styling with Overture'/>
+        <page name='18. Dependency Injection Made Comfortable'/>
+        <page name='19. Algebraic Data Types — Generics and Recursion'/>
+        <page name='20. NonEmpty'/>
+        <page name='21. Playground Driven Development'/>
+        <page name='22. A Tour of Point-Free'/>
     </pages>
 </playground>
