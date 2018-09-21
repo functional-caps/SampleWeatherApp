@@ -2,7 +2,7 @@
 
 // Either<A, B> = A + B
 // Pair<A, B>   = A * B
-// Func<A, B>   = B^A
+// Func<A, B>   = B ^ A
 
 // Algebra      | Swift Type System
 // --------------------------------
@@ -90,6 +90,10 @@ func + (lhs: NaturalNumber, rhs: NaturalNumber) -> NaturalNumber {
     switch (lhs, rhs) {
     case (.zero, let result), (let result, .zero): return result
     case (.successor(let lpr), .successor(let rpr)):
+        // a, b
+        // a = x + 1, b = y + 1
+        // a + b = (x + y) + 2
+        // a + b = (x + 2) + y
         return .successor(.successor(lpr + rpr))
     }
 }
@@ -100,6 +104,10 @@ func * (lhs: NaturalNumber, rhs: NaturalNumber) -> NaturalNumber {
     switch (lhs, rhs) {
     case (.zero, _), (_, .zero): return .zero
     case (.successor(let lpr), .successor(let rpr)):
+        // a, b
+        // a = x + 1, b = y + 1
+        // a * b == (x + 1) * (y + 1)
+        // a * b == x*y + x + y + 1
         return lpr * rpr + lpr + rpr + one
     }
 }
@@ -208,87 +216,107 @@ max(four, four) == four
  */
 
 enum AlgebraicInteger {
-    case zero
-    indirect case successor(AlgebraicInteger)
-    indirect case predecessor(AlgebraicInteger)
+    enum Sign { case plus, minus }
+    case number(NaturalNumber, Sign)
+
+    static let zero: AlgebraicInteger = .number(.zero, .plus)
 }
 
 let izero = AlgebraicInteger.zero
-let pone = AlgebraicInteger.successor(izero)
-let ptwo = AlgebraicInteger.successor(pone)
-let pthree = AlgebraicInteger.successor(ptwo)
-let pfour = AlgebraicInteger.successor(pthree)
-let pfive = AlgebraicInteger.successor(pfour)
-let psix = AlgebraicInteger.successor(pfive)
-let pseven = AlgebraicInteger.successor(psix)
-let peight = AlgebraicInteger.successor(pseven)
-let none = AlgebraicInteger.predecessor(izero)
-let ntwo = AlgebraicInteger.predecessor(none)
-let nthree = AlgebraicInteger.predecessor(ntwo)
-let nfour = AlgebraicInteger.predecessor(ntwo)
-let nfive = AlgebraicInteger.predecessor(nfour)
-let nsix = AlgebraicInteger.predecessor(nfive)
-let nseven = AlgebraicInteger.predecessor(nsix)
-let neight = AlgebraicInteger.predecessor(nseven)
+let pone = AlgebraicInteger.number(one, .plus)
+let ptwo = AlgebraicInteger.number(two, .plus)
+let pthree = AlgebraicInteger.number(three, .plus)
+let pfour = AlgebraicInteger.number(four, .plus)
+let pfive = AlgebraicInteger.number(five, .plus)
+let psix = AlgebraicInteger.number(six, .plus)
+let pseven = AlgebraicInteger.number(seven, .plus)
+let none = AlgebraicInteger.number(one, .minus)
+let ntwo = AlgebraicInteger.number(two, .minus)
+let nthree = AlgebraicInteger.number(three, .minus)
+let nfour = AlgebraicInteger.number(four, .minus)
+let nfive = AlgebraicInteger.number(five, .minus)
+let nsix = AlgebraicInteger.number(six, .minus)
+let nseven = AlgebraicInteger.number(seven, .minus)
 
 extension AlgebraicInteger: Equatable {
     static func == (lhs: AlgebraicInteger, rhs: AlgebraicInteger) -> Bool {
         switch (lhs, rhs) {
-        case (.zero, .zero): return true
-        case (.successor(let lpr), .successor(let rpr)),
-             (.predecessor(let lpr), .predecessor(let rpr)):
-            return lpr == rpr
-        default: return false
+        case (.number(.zero, _), .number(.zero, _)): return true
+        case (_, .number(.zero, _)), (.number(.zero, _), _): return false
+        case (.number(_, .plus), .number(_, .minus)),
+             (.number(_, .minus), .number(_, .plus)): return false
+        case let (.number(ln, .plus), .number(pn, .plus)),
+             let (.number(ln, .minus), .number(pn, .minus)): return ln == pn
         }
     }
 }
 
-//func + (lhs: AlgebraicInteger, rhs: AlgebraicInteger) -> AlgebraicInteger {
-//    switch (lhs, rhs) {
-//    case (.zero, let result), (let result, .zero): return result
-//    case (.successor(let lpr), .successor(let rpr)):
-//        return .successor(.successor(lpr + rpr))
-//    case (.predecessor(let lpr), .predecessor(let rpr)):
-//        return .predecessor(.predecessor(lpr + rpr))
-//    case (.successor(let positive), .predecessor(let negative)):
-//        return .successor(.successor(lpr + rpr))
-//    }
-//}
-//
-//func * (lhs: AlgebraicInteger, rhs: AlgebraicInteger) -> AlgebraicInteger {
-//    switch (lhs, rhs) {
-//    case (.zero, _), (_, .zero): return .zero
-//    case (.successor(let lpr), .successor(let rpr)):
-//        return lpr * rpr + lpr + rpr + one
-//    }
-//}
-//
-//func exp(_ base: AlgebraicInteger, _ power: AlgebraicInteger) -> AlgebraicInteger {
-//    switch (base, power) {
-//    case (_, .zero): return one
-//    case (_, .successor(let ppr)): return base * exp(base, ppr)
-//    }
-//}
-//
-//extension AlgebraicInteger: Comparable {
-//    static func < (lhs: AlgebraicInteger, rhs: AlgebraicInteger) -> Bool {
-//        if lhs == rhs { return false } // Irreflexivity
-//        switch (lhs, rhs) {
-//        case (.zero, _): return true
-//        case (_, .zero): return false
-//        case (.successor(let lpr), .successor(let rpr)):
-//            return lpr < rpr
-//        }
-//    }
-//}
-//
-//func min(_ lhs: AlgebraicInteger, _ rhs: AlgebraicInteger) -> AlgebraicInteger {
-//    if lhs < rhs { return lhs } else { return rhs }
-//}
-//
-//func max(_ lhs: AlgebraicInteger, _ rhs: AlgebraicInteger) -> AlgebraicInteger {
-//    if lhs < rhs { return rhs } else { return lhs }
-//}
+extension AlgebraicInteger: Comparable {
+    static func < (lhs: AlgebraicInteger, rhs: AlgebraicInteger) -> Bool {
+        if lhs == rhs { return false } // Irreflexivity
+        switch (lhs, rhs) {
+        case (.number(.zero, _), _), (.number(_, .minus), .number(_, .plus)): return true
+        case (_, .number(.zero, _)), (.number(_, .plus), .number(_, .minus)): return false
+        case let (.number(ln, .plus), .number(pn, .plus)): return ln < pn
+        case let (.number(ln, .minus), .number(pn, .minus)): return ln > pn
+        }
+    }
+}
+
+func difference(_ lhs: NaturalNumber, _ rhs: NaturalNumber) -> NaturalNumber {
+    switch (lhs, rhs) {
+    case (let result, .zero), (.zero, let result): return result
+    case (.successor(let lpr), .successor(let rpr)):
+        return difference(lpr, rpr)
+    }
+}
+
+func + (lhs: AlgebraicInteger, rhs: AlgebraicInteger) -> AlgebraicInteger {
+    switch (lhs, rhs) {
+    case let (.number(.zero, _), other), let (other, .number(.zero, _)): return other
+    case let (.number(ln, .plus), .number(pn, .plus)): return .number(ln + pn, .plus)
+    case let (.number(ln, .minus), .number(pn, .minus)): return .number(ln + pn, .minus)
+    case let (.number(ln, .plus), .number(pn, .minus)):
+        if ln > pn { return .number(difference(ln, pn), .plus) }
+        else if pn > ln { return .number(difference(ln, pn), .minus) }
+        else { return .zero }
+    case let (.number(ln, .minus), .number(pn, .plus)):
+        if ln > pn { return .number(difference(ln, pn), .minus) }
+        else if pn > ln { return .number(difference(ln, pn), .plus) }
+        else { return .zero }
+    }
+}
+
+func * (lhs: AlgebraicInteger, rhs: AlgebraicInteger) -> AlgebraicInteger {
+    switch (lhs, rhs) {
+    case (.number(.zero, _), _), (_, .number(.zero, _)): return .zero
+    case let (.number(ln, .plus), .number(pn, .plus)),
+         let (.number(ln, .minus), .number(pn, .minus)): return .number(ln * pn, .plus)
+    case let (.number(ln, .plus), .number(pn, .minus)),
+         let (.number(ln, .minus), .number(pn, .plus)): return .number(ln * pn, .minus)
+    }
+}
+
+func exp(_ base: AlgebraicInteger, _ power: AlgebraicInteger) -> AlgebraicInteger? {
+    switch (base, power) {
+    case (_, .number(.zero, _)): return .zero
+    case (_, .number(_, .minus)): return nil
+    case (_, .number(.successor(let ppr), .plus)):
+        guard let rest = exp(base, .number(ppr, .plus)) else { return nil }
+        return base * rest
+    }
+}
+
+func min(_ lhs: AlgebraicInteger, _ rhs: AlgebraicInteger) -> AlgebraicInteger {
+    if lhs < rhs { return lhs } else { return rhs }
+}
+
+func max(_ lhs: AlgebraicInteger, _ rhs: AlgebraicInteger) -> AlgebraicInteger {
+    if lhs < rhs { return rhs } else { return lhs }
+}
+
+ptwo + pthree == pfive
+ptwo * pthree == psix
 
 /*
 
@@ -300,6 +328,7 @@ extension AlgebraicInteger: Equatable {
 
  */
 
+// List<A> = 1 + A + A*A + A*A*A + ...
 // List<Void> = 1 + Void + Void*Void + Void*Void*Void + ...
 //            = 1 + 1 + 1 + 1 + ...
 
@@ -410,8 +439,6 @@ dump(NonEmptyList(arrayLiteral: 1, 2, 3, 4, 5))
 
 extension List: Collection {
 
-    typealias Element = A
-
     var startIndex: Int {
         return 0
     }
@@ -449,8 +476,6 @@ List(arrayLiteral: 1,2,3,4,5,6,7)[6]
 
 extension NonEmptyList_Old: Collection {
 
-    typealias Element = A
-
     var startIndex: Int {
         return 0
     }
@@ -475,8 +500,6 @@ extension NonEmptyList_Old: Collection {
 NonEmptyList_Old(arrayLiteral: 1,2,3,4,5,6,7)[0]
 
 extension NonEmptyList: Collection {
-
-    typealias Element = A
 
     var startIndex: Int {
         return 0
@@ -551,11 +574,22 @@ Fix<Int>.fix(.cons(1, .fix(.cons(2, .fix(.empty)))))
  */
 
 func to<A>(_ list: List<A>) -> Fix<A> {
-
+    switch list {
+    case .empty: return .fix(.empty)
+    case let .cons(head, tail): return .fix(.cons(head, to(tail)))
+    }
 }
+
+dump(to(List(arrayLiteral: 1, 2, 3)))
 
 func from<A>(_ fix: Fix<A>) -> List<A> {
-
+    switch fix {
+    case .fix(.empty): return .empty
+    case let .fix(.cons(head, tailFix)):
+        return .cons(head, from(tailFix))
+    }
 }
+
+dump(from(to(List(arrayLiteral: 1, 2, 3))))
 
 //: [Next](@next)
