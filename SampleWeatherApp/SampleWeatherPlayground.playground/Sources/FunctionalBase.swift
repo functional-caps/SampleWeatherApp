@@ -337,3 +337,150 @@ public func mutEach<A>(_ f: @escaping (inout A) -> Void) -> (inout [A]) -> Void 
 public struct Func<A, B> {
     let apply: (A) -> B
 }
+
+public struct NonEmpty<C: Collection> {
+    public var head: C.Element
+    public var tail: C
+    
+    public init(_ head: C.Element, _ tail: C) {
+        self.head = head
+        self.tail = tail
+    }
+}
+
+extension NonEmpty: CustomStringConvertible {
+    public var description: String {
+        return "\(self.head)\(self.tail)"
+    }
+}
+
+public extension NonEmpty where C: RangeReplaceableCollection {
+    init(_ head: C.Element, _ tail: C.Element...) {
+        self.head = head
+        self.tail = C(tail)
+    }
+}
+
+extension NonEmpty: Collection {
+    public enum Index: Comparable {
+        case head
+        case tail(C.Index)
+        
+        public static func < (lhs: Index, rhs: Index) -> Bool {
+            switch (lhs, rhs) {
+            case (.head, .tail):
+                return true
+            case (.tail, .head):
+                return false
+            case (.head, .head):
+                return false
+            case let (.tail(l), .tail(r)):
+                return l < r
+            }
+        }
+    }
+    
+    public var startIndex: Index {
+        return .head
+    }
+    
+    public var endIndex: Index {
+        return .tail(self.tail.endIndex)
+    }
+    
+    public subscript(position: Index) -> C.Element {
+        switch position {
+        case .head:
+            return self.head
+        case let .tail(index):
+            return self.tail[index]
+        }
+    }
+    
+    public func index(after i: Index) -> Index {
+        switch i {
+        case .head:
+            return .tail(self.tail.startIndex)
+        case let .tail(index):
+            return .tail(self.tail.index(after: index))
+        }
+    }
+}
+
+public extension NonEmpty {
+    var first: C.Element {
+        return self.head
+    }
+}
+
+extension NonEmpty: BidirectionalCollection where C: BidirectionalCollection {
+    public func index(before i: Index) -> Index {
+        switch i {
+        case .head:
+            return .tail(self.tail.index(before: self.tail.startIndex))
+        case let .tail(index):
+            return index == self.tail.startIndex ? .head : .tail(self.tail.index(before: index))
+        }
+    }
+}
+
+public extension NonEmpty where C: BidirectionalCollection {
+    var last: C.Element {
+        return self.tail.last ?? self.head
+    }
+}
+
+public extension NonEmpty where C.Index == Int {
+    subscript(position: Int) -> C.Element {
+        return self[position == 0 ? .head : .tail(position - 1)]
+    }
+}
+
+extension NonEmpty: MutableCollection where C: MutableCollection {
+    public subscript(position: Index) -> C.Element {
+        get {
+            switch position {
+            case .head:
+                return self.head
+            case let .tail(index):
+                return self.tail[index]
+            }
+        }
+        set(newValue) {
+            switch position {
+            case .head:
+                self.head = newValue
+            case let .tail(index):
+                self.tail[index] = newValue
+            }
+        }
+    }
+}
+
+public extension NonEmpty where C: MutableCollection, C.Index == Int {
+    subscript(position: Int) -> C.Element {
+        get {
+            return self[position == 0 ? .head : .tail(position - 1)]
+        }
+        set {
+            self[position == 0 ? .head : .tail(position - 1)] = newValue
+        }
+    }
+}
+
+public extension NonEmpty where C: SetAlgebra {
+    init(_ head: C.Element, _ tail: C) {
+        var tail = tail
+        tail.remove(head)
+        self.head = head
+        self.tail = tail
+    }
+    init(_ head: C.Element, _ tail: C.Element...) {
+        var tail = C(tail)
+        tail.remove(head)
+        self.head = head
+        self.tail = tail
+    }
+}
+
+public typealias NonEmptySet<A> = NonEmpty<Set<A>> where A: Hashable
