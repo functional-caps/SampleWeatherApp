@@ -126,17 +126,32 @@ dict["5"]
 protocol DictionaryProtocol {
     associatedtype Key: Hashable
     associatedtype Value
+    
+    typealias Element = (key: Key, value: Value)
+    
+    subscript(_ key: Key) -> Value? { get set }
+    mutating func removeValue(forKey key: Key) -> Value?
 }
 
 extension Dictionary: DictionaryProtocol {}
 
-extension NonEmpty where C: DictionaryProtocol {
+extension NonEmpty {
     
-    init(_ head: (key: C.Key, value: C.Value), _ tail: C) {
-        
+    init<Key, Value>(
+        uniquingHead head: (key: Key, value: Value), _ tail: C
+    ) where C == [Key: Value] {
+        var copyTail = tail
+        if copyTail[head.key] != nil {
+            copyTail.removeValue(forKey: head.key)
+        }
+        self.head = head
+        self.tail = copyTail
     }
 }
 
+let dict2 = NonEmptyDictionary(uniquingHead: ("1", 2), ["3" : 4])
+let dict3 = NonEmptyDictionary(uniquingHead: ("1", 2), ["1" : 4])
+let dict4 = NonEmptyDictionary(uniquingHead: ("1", 2), ["3" : 4, "1": 3])
 
 /*
  
@@ -148,6 +163,24 @@ extension NonEmpty where C: DictionaryProtocol {
  
  */
 
+extension NonEmpty {
+
+    mutating func updateValue<Key, Value>(
+        _ value: Value, forKey key: Key
+    ) where C == [Key: Value] {
+        let (headKey, headValue) = head
+        if headKey == key {
+            head = (key: key, value: value)
+        } else {
+            tail[key] = value
+        }
+    }
+}
+
+var dict5 = NonEmptyDictionary(uniquingHead: ("1", 2), ["3" : 4, "1": 3])
+dict5.updateValue(100, forKey: "1")
+dict5.updateValue(200, forKey: "3")
+
 /*
  
  Exercise 7:
@@ -157,6 +190,37 @@ extension NonEmpty where C: DictionaryProtocol {
  Answer 7:
  
  */
+
+extension NonEmpty {
+    
+//    public func merging(
+//        _ other: Self,
+//        uniquingKeysWith combine: (C.Value, C.Value) throws -> C.Value
+//    ) rethrows -> Self {
+//
+//    }
+
+//    public func merging<S>(
+//        _ other: S,
+//        uniquingKeysWith combine: (C.Value, C.Value) throws -> C.Value
+//    ) rethrows -> Self where S : Sequence, S.Element == (Key, Value) {
+//
+//    }
+//
+//    public mutating func merge(
+//        _ other: Self,
+//        uniquingKeysWith combine: (C.Value, C.Value) throws -> C.Value
+//    ) rethrows {
+//
+//    }
+//
+//    public mutating func merge<S>(
+//        _ other: S,
+//        uniquingKeysWith combine: (C.Value, C.Value) throws -> C.Value
+//    ) rethrows where S : Sequence, S.Element == (Key, Value) {
+//
+//    }
+}
 
 /*
  
@@ -176,6 +240,14 @@ extension NonEmpty where C: DictionaryProtocol {
  
  */
 
+extension NonEmpty {
+
+    func joined<InnerCollection>() -> NonEmpty<C.C>
+        where C == NonEmpty<InnerCollection>, InnerCollection: Collection {
+        return NonEmpty<C.C>(head.head, tail.joined())
+    }
+}
+
 /*
  
  Exercise 9:
@@ -188,6 +260,8 @@ extension NonEmpty where C: DictionaryProtocol {
  
  */
 
+
+
 /*
  
  Exercise 10:
@@ -197,6 +271,8 @@ extension NonEmpty where C: DictionaryProtocol {
  Answer 10:
  
  */
+
+
 
 /*
  
@@ -209,5 +285,7 @@ extension NonEmpty where C: DictionaryProtocol {
  Answer 11:
 
 */
+
+
 
 //: [Next](@next)

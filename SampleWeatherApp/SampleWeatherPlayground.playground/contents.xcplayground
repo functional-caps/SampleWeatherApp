@@ -24,5 +24,8 @@
         <page name='20. NonEmpty'/>
         <page name='21. Playground Driven Development'/>
         <page name='22. A Tour of Point-Free'/>
+        <page name='23. The Many Faces of Zip — Part 1'/>
+        <page name='24. The Many Faces of Zip — Part 2'/>
+        <page name='25. The Many Faces of Zip — Part 3'/>
     </pages>
 </playground>
