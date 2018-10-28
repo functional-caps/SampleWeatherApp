@@ -122,19 +122,6 @@ dict["5"]
  
  */
 
-
-protocol DictionaryProtocol {
-    associatedtype Key: Hashable
-    associatedtype Value
-    
-    typealias Element = (key: Key, value: Value)
-    
-    subscript(_ key: Key) -> Value? { get set }
-    mutating func removeValue(forKey key: Key) -> Value?
-}
-
-extension Dictionary: DictionaryProtocol {}
-
 extension NonEmpty {
     
     init<Key, Value>(

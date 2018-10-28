@@ -1,5 +1,85 @@
 //: [Previous](@previous)
 
+struct F3<A> {
+    let run: (@escaping (A) -> Void) -> Void
+}
+
+func map<A, B>(_ f: @escaping (A) -> B) -> (F3<A>) -> F3<B> {
+    return { f3 in
+        return F3 { callback in
+            f3.run { callback(f($0)) }
+        }
+    }
+}
+
+func zip2<A, B>(_ fa: F3<A>, _ fb: F3<B>) -> F3<(A, B)> {
+    return F3 { callback in
+        var a: A?
+        var b: B?
+        fa.run {
+            a = $0
+            if let b = b { callback(($0, b)) }
+        }
+        fb.run {
+            b = $0
+            if let a = a { callback((a, $0)) }
+        }
+    }
+}
+
+func zip2<A, B>(_ xs: [A], _ ys: [B]) -> [(A, B)] {
+    var result: [(A, B)] = []
+    (0..<min(xs.count, ys.count)).forEach { idx in
+        result.append((xs[idx], ys[idx]))
+    }
+    return result
+}
+
+func zip3<A, B, C>(
+    _ xs: [A], _ ys: [B], _ zs: [C]
+    ) -> [(A, B, C)] {
+    
+    return zip2(xs, zip2(ys, zs)) // [(A, (B, C))]
+        .map { a, bc in (a, bc.0, bc.1) }
+}
+
+func zip2<A, B, C>(
+    with f: @escaping (A, B) -> C
+    ) -> ([A], [B]) -> [C] {
+    return { zip2($0, $1).map(f) }
+}
+
+func zip3<A, B, C, D>(
+    with f: @escaping (A, B, C) -> D
+    ) -> ([A], [B], [C]) -> [D] {
+    
+    return { xs, ys, zs in zip3(xs, ys, zs).map(f) }
+}
+
+func zip2<A, B>(_ a: A?, _ b: B?) -> (A, B)? {
+    guard let a = a, let b = b else { return nil }
+    return (a, b)
+}
+
+func zip3<A, B, C>(_ a: A?, _ b: B?, _ c: C?) -> (A, B, C)? {
+    return zip2(a, zip2(b, c))
+        .map { a, bc in (a, bc.0, bc.1) }
+}
+
+func zip2<A, B, C>(
+    with f: @escaping (A, B) -> C
+    ) -> (A?, B?) -> C? {
+    
+    return { zip2($0, $1).map(f) }
+}
+
+func zip3<A, B, C, D>(
+    with f: @escaping (A, B, C) -> D
+    ) -> (A?, B?, C?) -> D? {
+    
+    return { zip3($0, $1, $2).map(f) }
+}
+
 /*
  
  Exercise 1:
@@ -9,6 +89,31 @@
  Answer 1:
  
  */
+
+import Foundation
+
+func zip2safer<A, B>(_ fa: F3<A>, _ fb: F3<B>) -> F3<(A, B)> {
+    return F3 { callback in
+        
+        let dispatchGroup = DispatchGroup()
+        
+        var a: A?
+        var b: B?
+        dispatchGroup.enter()
+        dispatchGroup.enter()
+        fa.run {
+            a = $0
+            dispatchGroup.leave()
+        }
+        fb.run {
+            b = $0
+            dispatchGroup.leave()
+        }
+        dispatchGroup.notify(queue: DispatchQueue.global(qos: .userInitiated)) {
+            if let a = a, let b = b { callback((a, b)) }
+        }
+    }
+}
 
 /*
  
@@ -20,6 +125,46 @@
  
  */
 
+struct F4<Input, Return> {
+    let run: (@escaping (Input) -> Return) -> Return
+}
+
+func zip2<InputA, InputB, Return>(_ fa: F4<InputA, Return>, _ fb: F4<InputB, Return>) -> F4<(InputA, InputB), Return> {
+    return F4 { tupleTaking -> Return in
+        // couldn't find a way to produce R without waiting for the closures to produce them
+        return fa.run { inputA -> Return in
+            return fb.run { inputB -> Return in
+                return tupleTaking((inputA, inputB))
+            }
+        }
+    }
+}
+
+func zip2<InputA, InputB, Output, Return>(
+    with f: @escaping (InputA, InputB) -> Output
+) -> (F4<InputA, Return>, F4<InputB, Return>) -> F4<Output, Return> {
+    return { fa, fb in
+        let fab = zip2(fa, fb)
+        return F4<Output, Return> { callback in
+            return fab.run { ab in
+                callback(f(ab.0, ab.1))
+            }
+        }
+    }
+}
+
+let fa = F4<Int, String> { $0(4) }
+
+let fb = F4<Double, String> { $0(2.1) }
+
+let fc = zip2(fa, fb)
+
+fc.run({ tuple in
+    print(tuple)
+    return String(describing: tuple)
+})
+
+
 /*
  
  Exercise 3:
@@ -29,6 +174,8 @@
  Answer 3:
  
  */
+
+// DispatchQueue.main.sync(execute: <#T##() throws -> T#>) ??
 
 /*
  
@@ -42,6 +189,10 @@
  
  */
 
+func zip2<A, B>(_ as: [A]?, _ bs: [B]?) -> [(A, B)]? {
+    return zip2(`as`, bs).map(zip2)
+}
+
 /*
  
  Exercise 4.2:
@@ -51,6 +202,13 @@
  Answer 4.2:
  
  */
+
+let noArray: [Int]? = nil
+
+zip2(noArray, noArray)
+zip2([1, 2, 3], noArray)
+zip2(noArray, [1, 2, 3])
+zip2([1, 2, 3], [1, 2, 3])
 
 /*
  
@@ -62,6 +220,40 @@
  
  */
 
+typealias NonEmptyArray<T> = NonEmpty<[T]>
+
+enum Validated<A, E> {
+    case valid(A)
+    case invalid(NonEmptyArray<E>)
+}
+
+func + <T>(lhs: NonEmptyArray<T>, rhs: NonEmptyArray<T>) -> NonEmptyArray<T> {
+    return NonEmptyArray(lhs.head, lhs.tail + [rhs.head] + rhs.tail)
+}
+
+func map<A, B, E>(_ f: @escaping (A) -> B) -> (Validated<A, E>) -> Validated<B, E> {
+    return { validated in
+        switch validated {
+        case let .valid(a):
+            return .valid(f(a))
+        case let .invalid(e):
+            return .invalid(e)
+        }
+    }
+}
+
+func zip2<A, B, E>(_ lv: Validated<A, E>, _ rv: Validated<B, E>) -> Validated<(A, B), E> {
+    switch (lv, rv) {
+    case let (.valid(a), .valid(b)): return .valid((a, b))
+    case let (.valid, .invalid(e)), let (.invalid(e), .valid): return .invalid(e)
+    case let (.invalid(le), .invalid(re)): return .invalid(le + re)
+    }
+}
+
+func zip2<A, B, E>(_ lv: [Validated<A, E>], _ rv: [Validated<B, E>]) -> [Validated<(A, B), E>] {
+    return zip2(lv, rv) |> map(zip2)
+}
+
 /*
  
  Exercise 4.4:
@@ -71,6 +263,14 @@
  Answer 4.4:
  
  */
+
+let valid = Validated<Int, String>.valid(42)
+let invalid = Validated<Int, String>.invalid(NonEmptyArray("not 42", "also stupid"))
+
+zip2([valid, valid], [])
+zip2([valid], [invalid])
+zip2([], [invalid, valid])
+zip2([invalid], [invalid])
 
 /*
  
@@ -82,6 +282,27 @@
  
  */
 
+typealias FuncMaybe<R, A> = Func<R, A?>
+
+func zip2<A, B, R>(_ lf: Func<R, A>, _ rf: Func<R, B>) -> Func<R, (A, B)> {
+    return Func<R, (A, B)> { (r: R) -> (A, B) in
+        return (lf.apply(r), rf.apply(r))
+    }
+}
+
+func map<A, B, R>(_ f: @escaping (A) -> B) -> (Func<R, A>) -> Func<R, B> {
+    return { input in
+        return Func<R, B> { r in
+            return f(input.apply(r))
+        }
+        
+    }
+}
+
+func zip2<A, B, R>(_ lf: Func<R, A?>, _ rf: Func<R, B?>) -> Func<R, (A, B)?> {
+    return zip2(lf, rf) |> map(zip2)
+}
+
 /*
  
  Exercise 4.6:
@@ -91,6 +312,10 @@
  Answer 4.6:
  
  */
+
+func zip2<A, B, R>(_ lf: Func<R, [A]>, _ rf: Func<R, [B]>) -> Func<R, [(A, B)]> {
+    return zip2(lf, rf) |> map(zip2)
+}
 
 /*
  
@@ -102,6 +327,10 @@
  
  */
 
+func zip2<A, B, E>(_ lf: F3<Validated<A, E>>, _ rf: F3<Validated<B, E>>) -> F3<Validated<(A, B), E>> {
+    return zip2safer(lf, rf) |> map(zip2)
+}
+
 /*
  
  Exercise 5:
@@ -111,5 +340,8 @@
  Answer 5:
  
  */
+
+// YES: { zip2 on Container1<Container2<T>> } is { zip2 on container1 } |> map { zip2 on Container2 }
+// map is used to go inside containers, zip is used to adjust the types structure
 
 //: [Next](@next)

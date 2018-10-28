@@ -335,7 +335,10 @@ public func mutEach<A>(_ f: @escaping (inout A) -> Void) -> (inout [A]) -> Void 
 }
 
 public struct Func<A, B> {
-    let apply: (A) -> B
+    public let apply: (A) -> B
+    public init(apply: @escaping (A) -> B) {
+        self.apply = apply
+    }
 }
 
 public struct NonEmpty<C: Collection> {
