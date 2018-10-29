@@ -365,6 +365,9 @@ public extension NonEmpty where C: RangeReplaceableCollection {
 }
 
 extension NonEmpty: Collection {
+
+    public typealias Element = C.Element
+
     public enum Index: Comparable {
         case head
         case tail(C.Index)

@@ -125,20 +125,33 @@ dict["5"]
 extension NonEmpty {
     
     init<Key, Value>(
-        uniquingHead head: (key: Key, value: Value), _ tail: C
+        _ head: (key: Key, value: Value),
+        _ tail: C,
+        _ f: (Value, Value) -> Value
     ) where C == [Key: Value] {
-        var copyTail = tail
-        if copyTail[head.key] != nil {
+        if let value = tail[head.key] {
+            var copyTail = tail
+            let chosenValue = f(head.value, value)
             copyTail.removeValue(forKey: head.key)
+            self.head = (key: head.key, value: chosenValue)
+            self.tail = copyTail
+        } else {
+            self.head = head
+            self.tail = tail
         }
-        self.head = head
-        self.tail = copyTail
+
     }
 }
 
-let dict2 = NonEmptyDictionary(uniquingHead: ("1", 2), ["3" : 4])
-let dict3 = NonEmptyDictionary(uniquingHead: ("1", 2), ["1" : 4])
-let dict4 = NonEmptyDictionary(uniquingHead: ("1", 2), ["3" : 4, "1": 3])
+let dict2 = NonEmptyDictionary(("1", 2), ["3" : 4]) {
+    one, _ in  one
+}
+let dict3 = NonEmptyDictionary(("1", 2), ["1" : 4]) {
+    one, _ in  one
+}
+let dict4 = NonEmptyDictionary(("1", 2), ["3" : 4, "1": 3]) {
+    one, _ in  one
+}
 
 /*
  
@@ -155,8 +168,7 @@ extension NonEmpty {
     mutating func updateValue<Key, Value>(
         _ value: Value, forKey key: Key
     ) where C == [Key: Value] {
-        let (headKey, headValue) = head
-        if headKey == key {
+        if head.key == key {
             head = (key: key, value: value)
         } else {
             tail[key] = value
@@ -164,7 +176,7 @@ extension NonEmpty {
     }
 }
 
-var dict5 = NonEmptyDictionary(uniquingHead: ("1", 2), ["3" : 4, "1": 3])
+var dict5 = NonEmptyDictionary(("1", 2), ["3" : 4, "5": 6])
 dict5.updateValue(100, forKey: "1")
 dict5.updateValue(200, forKey: "3")
 
@@ -180,34 +192,85 @@ dict5.updateValue(200, forKey: "3")
 
 extension NonEmpty {
     
-//    public func merging(
-//        _ other: Self,
-//        uniquingKeysWith combine: (C.Value, C.Value) throws -> C.Value
-//    ) rethrows -> Self {
-//
-//    }
+    func merging<Key, Value>(
+        _ other: NonEmptyDictionary<Key, Value>,
+        uniquingKeysWith combine: (Value, Value) -> Value
+    ) -> NonEmptyDictionary<Key, Value> where C == [Key: Value] {
+        var copyTail = self.tail
 
-//    public func merging<S>(
-//        _ other: S,
-//        uniquingKeysWith combine: (C.Value, C.Value) throws -> C.Value
-//    ) rethrows -> Self where S : Sequence, S.Element == (Key, Value) {
-//
-//    }
-//
-//    public mutating func merge(
-//        _ other: Self,
-//        uniquingKeysWith combine: (C.Value, C.Value) throws -> C.Value
-//    ) rethrows {
-//
-//    }
-//
-//    public mutating func merge<S>(
-//        _ other: S,
-//        uniquingKeysWith combine: (C.Value, C.Value) throws -> C.Value
-//    ) rethrows where S : Sequence, S.Element == (Key, Value) {
-//
-//    }
+        for elem in other.tail {
+            // The code is dupliated to not make the combine escaping
+            let (otherKey, otherValue) = elem
+            if let value = copyTail.removeValue(forKey: otherKey)  {
+                copyTail[otherKey] = combine(otherValue, value)
+            } else {
+                copyTail[otherKey] = otherValue
+            }
+        }
+
+        for elem in [other.head] {
+            // The code is dupliated to not make the combine escaping
+            let (otherKey, otherValue) = elem
+            if let value = copyTail.removeValue(forKey: otherKey)  {
+                copyTail[otherKey] = combine(otherValue, value)
+            } else {
+                copyTail[otherKey] = otherValue
+            }
+        }
+
+        var copyHead = self.head
+        let (otherKey, otherValue) = copyHead
+        if let value = copyTail.removeValue(forKey: otherKey)  {
+            copyHead.value = combine(otherValue, value)
+        }
+
+        return NonEmptyDictionary(copyHead, copyTail)
+    }
+
+    mutating func merge<Key, Value>(
+        _ other: NonEmptyDictionary<Key, Value>,
+        uniquingKeysWith combine: (Value, Value) -> Value
+    ) where C == [Key: Value] {
+        var copyTail = self.tail
+
+        for elem in other.tail {
+            // The code is dupliated to not make the combine escaping
+            let (otherKey, otherValue) = elem
+            if let value = copyTail.removeValue(forKey: otherKey)  {
+                copyTail[otherKey] = combine(otherValue, value)
+            } else {
+                copyTail[otherKey] = otherValue
+            }
+        }
+
+        for elem in [other.head] {
+            // The code is dupliated to not make the combine escaping
+            let (otherKey, otherValue) = elem
+            if let value = copyTail.removeValue(forKey: otherKey)  {
+                copyTail[otherKey] = combine(otherValue, value)
+            } else {
+                copyTail[otherKey] = otherValue
+            }
+        }
+
+        var copyHead = self.head
+        let (otherKey, otherValue) = copyHead
+        if let value = copyTail.removeValue(forKey: otherKey)  {
+            copyHead.value = combine(otherValue, value)
+        }
+
+        self.head = copyHead
+        self.tail = copyTail
+    }
 }
+
+var dict6 = NonEmptyDictionary(("1", 2), ["3" : 4, "5": 6])
+var dict7 = NonEmptyDictionary(("1", 2), ["3" : 4, "7": 8])
+var dict8 = NonEmptyDictionary(("2", 3), ["4" : 5, "5": 6])
+dict6
+    .merging(dict7) { one, _ in one }
+dict7
+    .merge(dict8) { one, _ in one }
 
 /*
  
@@ -227,13 +290,59 @@ extension NonEmpty {
  
  */
 
+// NonEmpty<Array<NonEmpty<Array<Int>>
+
+extension NonEmpty where C: RangeReplaceableCollection {
+
+    private var elements: C {
+        var elementsFromCollection = C()
+        elementsFromCollection.append(head)
+        elementsFromCollection.append(contentsOf: tail)
+        return elementsFromCollection
+    }
+
+}
+
 extension NonEmpty {
 
-    func joined<InnerCollection>() -> NonEmpty<C.C>
-        where C == NonEmpty<InnerCollection>, InnerCollection: Collection {
-        return NonEmpty<C.C>(head.head, tail.joined())
+    func joinedNE<InnerCollection>(
+        separator: NonEmpty<InnerCollection>?
+        ) -> NonEmpty<InnerCollection> where Element == NonEmpty<InnerCollection>, InnerCollection: RangeReplaceableCollection {
+        var elementsFromSeparator = InnerCollection()
+        if let separator = separator {
+            elementsFromSeparator = separator.elements
+        }
+
+        let newHead = self.head.head
+        var newTail: InnerCollection = self.head.tail
+        newTail.append(contentsOf: elementsFromSeparator)
+
+        if let last = self.tail.reversed().first {
+            for collection in self.tail.dropLast() {
+                newTail.append(contentsOf: collection.elements)
+                newTail.append(contentsOf: elementsFromSeparator)
+            }
+            newTail.append(contentsOf: last)
+        }
+
+
+        return NonEmpty<InnerCollection>(newHead, newTail)
     }
 }
+
+let s1 = NonEmpty<Array<Int>>(1, 2, 3)
+let s2 = NonEmpty<Array<Int>>(4, 5, 6)
+let s3 = NonEmpty<Array<Int>>(7, 8, 9)
+let s4 = NonEmpty<Array<Int>>(0, 0, 0)
+
+let asd =
+    NonEmpty<Array<NonEmpty<Array<Int>>>>.init(s1, s2, s3)
+dump(
+    asd
+        .joinedNE(separator: s4)
+)
+
+// how to construct it?
 
 /*
  
@@ -247,7 +356,65 @@ extension NonEmpty {
  
  */
 
+[1,2,3,4,1,2,1,1,2,2]
+    .split(maxSplits: Int.max, omittingEmptySubsequences: true, whereSeparator: { _ in false })
 
+extension NonEmpty {
+    func splitNE<OuterCollection>(
+        whereSeparator shouldSeparate: (C.Element) -> Bool
+    ) -> NonEmpty<OuterCollection> where OuterCollection.Element == NonEmpty<C>, C: RangeReplaceableCollection, OuterCollection: RangeReplaceableCollection {
+        var outer = OuterCollection()
+        var inner = C()
+
+        if !shouldSeparate(self.head) {
+            inner.append(self.head)
+        }
+
+        for elem in self.tail {
+            if shouldSeparate(elem) {
+
+                if let head = inner.first {
+                    let tail = C(inner.dropFirst())
+                    let newNE = NonEmpty<C>(head, tail)
+                    outer.append(newNE)
+                    inner.removeAll(keepingCapacity: true)
+
+                } else {
+                    continue
+                }
+
+            } else {
+                inner.append(elem)
+            }
+        }
+
+        if let head = inner.first {
+            let tail = C(inner.dropFirst())
+            let newNE = NonEmpty<C>(head, tail)
+            outer.append(newNE)
+            inner.removeAll(keepingCapacity: true)
+        }
+
+
+        if let head = outer.first {
+            let tail = OuterCollection(outer.dropFirst())
+            return NonEmpty<OuterCollection>(head, tail)
+        } else {
+            fatalError("Couldn't make nonempty collection out of empty data source")
+        }
+
+    }
+
+    func splitNEq<OuterCollection>(
+        separator: C.Element
+        ) -> NonEmpty<OuterCollection> where C.Element: Equatable, OuterCollection.Element == NonEmpty<C>, C: RangeReplaceableCollection, OuterCollection: RangeReplaceableCollection {
+        return self.splitNE(whereSeparator: { elem in elem == separator })
+    }
+}
+
+let arr: NonEmpty<Array<NonEmpty<Array<Int>>>> =
+    NonEmpty<Array<Int>>(1, 2, 3, 1, 4, 5, 6, 1, 7, 1, 8, 9)
+    .splitNEq(separator: 1)
 
 /*
  
@@ -259,7 +426,35 @@ extension NonEmpty {
  
  */
 
+extension NonEmpty: Equatable where C: Equatable, C.Element: Equatable {
+    public static func == (lhs: NonEmpty<C>, rhs: NonEmpty<C>) -> Bool {
+        if lhs.head == rhs.head {
+            return lhs.tail == rhs.tail
+        } else {
+            let rHeadInL = lhs.tail.contains { elem -> Bool in
+                elem == rhs.head
+            }
+            let lHeadInR = rhs.tail.contains { elem -> Bool in
+                elem == lhs.head
+            }
+            if rHeadInL && lHeadInR {
+                let newLHS = lhs.tail.filter { elem -> Bool in
+                    elem != rhs.head
+                }
+                let newRHS = rhs.tail.filter { elem -> Bool in
+                    elem != lhs.head
+                }
+                return newLHS == newRHS
+            }
+        }
+        return false
+    }
+}
 
+s1 == s2
+s1 == s1
+
+NonEmptySet(1, 2, 3) == NonEmptySet(3, 2, 1)
 
 /*
  
@@ -273,6 +468,10 @@ extension NonEmpty {
 
 */
 
-
+func zip<A, B>(_ a: NonEmpty<[A]>, _ b: NonEmpty<[B]>) -> NonEmpty<[(A, B)]> {
+    let head = (a.head, b.head)
+    let tail = Array(zip(a.tail, b.tail))
+    return NonEmpty<[(A, B)]>(head, tail)
+}
 
 //: [Next](@next)
