@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2565321522040FAD001EBFBF /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2565321422040FAD001EBFBF /* NetworkClient.swift */; };
+		2565321722040FCA001EBFBF /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2565321622040FCA001EBFBF /* Environment.swift */; };
+		2565321922041017001EBFBF /* URLSessionInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2565321822041017001EBFBF /* URLSessionInterface.swift */; };
+		2565321B2207F7BC001EBFBF /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2565321A2207F7BC001EBFBF /* Result.swift */; };
+		2565321D2207FD58001EBFBF /* FunctionalBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2565321C2207FD58001EBFBF /* FunctionalBase.swift */; };
+		257A9757220D3BEA003DBB4E /* Parallel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257A9756220D3BEA003DBB4E /* Parallel.swift */; };
+		257A975B220D4BD1003DBB4E /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257A975A220D4BD1003DBB4E /* Either.swift */; };
+		259947C4220A1BE000FB64C3 /* Deserialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259947C3220A1BE000FB64C3 /* Deserialization.swift */; };
 		884578EE20FB72D00021A102 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 884578ED20FB72D00021A102 /* AppDelegate.swift */; };
 		884578F520FB72D10021A102 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 884578F420FB72D10021A102 /* Assets.xcassets */; };
 		884578F820FB72D10021A102 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 884578F620FB72D10021A102 /* LaunchScreen.storyboard */; };
@@ -72,6 +80,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2565321422040FAD001EBFBF /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
+		2565321622040FCA001EBFBF /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
+		2565321822041017001EBFBF /* URLSessionInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionInterface.swift; sourceTree = "<group>"; };
+		2565321A2207F7BC001EBFBF /* Result.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
+		2565321C2207FD58001EBFBF /* FunctionalBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FunctionalBase.swift; sourceTree = "<group>"; };
+		257A9756220D3BEA003DBB4E /* Parallel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parallel.swift; sourceTree = "<group>"; };
+		257A975A220D4BD1003DBB4E /* Either.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Either.swift; sourceTree = "<group>"; };
+		259947C3220A1BE000FB64C3 /* Deserialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deserialization.swift; sourceTree = "<group>"; };
 		884578EA20FB72D00021A102 /* SampleWeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleWeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		884578ED20FB72D00021A102 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		884578EF20FB72D00021A102 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -137,6 +153,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		257A9758220D4BAD003DBB4E /* Containers */ = {
+			isa = PBXGroup;
+			children = (
+				257A975A220D4BD1003DBB4E /* Either.swift */,
+				2565321A2207F7BC001EBFBF /* Result.swift */,
+				257A9756220D3BEA003DBB4E /* Parallel.swift */,
+			);
+			path = Containers;
+			sourceTree = "<group>";
+		};
+		257A9759220D4BBD003DBB4E /* Composition */ = {
+			isa = PBXGroup;
+			children = (
+				2565321C2207FD58001EBFBF /* FunctionalBase.swift */,
+			);
+			path = Composition;
+			sourceTree = "<group>";
+		};
 		884578E120FB72D00021A102 = {
 			isa = PBXGroup;
 			children = (
@@ -163,10 +197,16 @@
 		884578EC20FB72D00021A102 /* SampleWeatherApp */ = {
 			isa = PBXGroup;
 			children = (
+				257A9759220D4BBD003DBB4E /* Composition */,
+				257A9758220D4BAD003DBB4E /* Containers */,
 				884578ED20FB72D00021A102 /* AppDelegate.swift */,
 				884578F420FB72D10021A102 /* Assets.xcassets */,
 				884578F620FB72D10021A102 /* LaunchScreen.storyboard */,
 				884578F920FB72D10021A102 /* Info.plist */,
+				2565321422040FAD001EBFBF /* NetworkClient.swift */,
+				2565321622040FCA001EBFBF /* Environment.swift */,
+				2565321822041017001EBFBF /* URLSessionInterface.swift */,
+				259947C3220A1BE000FB64C3 /* Deserialization.swift */,
 			);
 			path = SampleWeatherApp;
 			sourceTree = "<group>";
@@ -424,7 +464,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2565321922041017001EBFBF /* URLSessionInterface.swift in Sources */,
+				259947C4220A1BE000FB64C3 /* Deserialization.swift in Sources */,
+				2565321B2207F7BC001EBFBF /* Result.swift in Sources */,
 				884578EE20FB72D00021A102 /* AppDelegate.swift in Sources */,
+				2565321D2207FD58001EBFBF /* FunctionalBase.swift in Sources */,
+				2565321722040FCA001EBFBF /* Environment.swift in Sources */,
+				257A9757220D3BEA003DBB4E /* Parallel.swift in Sources */,
+				257A975B220D4BD1003DBB4E /* Either.swift in Sources */,
+				2565321522040FAD001EBFBF /* NetworkClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
