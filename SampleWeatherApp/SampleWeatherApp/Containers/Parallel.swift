@@ -32,24 +32,38 @@ func map<A, B, C>(_ f: @escaping (A) -> B) -> (Parallel<A, C>) -> Parallel<B, C>
 }
 
 extension Parallel {
-
     func flatMap<C>(_ f: @escaping (A) -> Parallel<C, B>) -> Parallel<C, B> {
         return self |> (SampleWeatherApp.flatMap <| f)
     }
-    
 }
 
 func flatMap<A, B, C>(_ f: @escaping (A) -> Parallel<B, C>) -> (Parallel<A, C>) -> Parallel<B, C> {
     return { (parallelA: Parallel<A, C>) in
         var parallelToReturn: Parallel<B, C>? = nil
-        let dispatchGroup = DispatchGroup()
-        dispatchGroup.enter()
+        let dispatchSemaphore = DispatchSemaphore(value: 0)
         _ = parallelA.run { a in
             parallelToReturn = f(a)
-            dispatchGroup.leave()
+            dispatchSemaphore.signal()
         }
-        dispatchGroup.wait()
+        dispatchSemaphore.wait()
         return parallelToReturn!
+    }
+}
+
+extension Parallel {
+    func toCompletion(_ f: @escaping (B) -> Void) -> Completion<A> {
+        return self |> SampleWeatherApp.toCompletion(f)
+    }
+}
+
+func toCompletion<A, B>(_ f: @escaping (B) -> Void) -> (Parallel<A, B>) -> Completion<A> {
+    return { parallel in
+        return Completion { completion in
+            let b = parallel.run { a in
+                completion(a)
+            }
+            return f(b)
+        }
     }
 }
 

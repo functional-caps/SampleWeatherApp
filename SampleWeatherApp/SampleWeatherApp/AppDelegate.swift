@@ -9,7 +9,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     //
     // TODO
     //
-    // Zmienić completion blocki na paralele, bo teraz jest siara i w compeltion bloku część logiki siedzi osobno
+    // ✅ Zmienić completion blocki na paralele, bo teraz jest siara i w compeltion bloku część logiki siedzi osobno
     //
     // Dopisać testy i zobaczyć, gdzie ssie testowanie
     //
@@ -19,8 +19,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     //
     // dorzucić request na forecast
     //
-    
-    
     
     
     
@@ -53,53 +51,21 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     
     // Może taki patern jako fileprivate
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         window.rootViewController = ViewController()
         window.makeKeyAndVisible()
         
-        // time for monad transformers!
         fetchCurrentWeather(for: .warsaw)
-            .map { dataResult in
-                dataResult.flatMap { data in
-                    deserialize(into: CurrentWeather.self)(data)
-                }
-            }
-            .map { responseResult in
-                responseResult.map(toEither(withR: ErrorResponse.self))
-            }
-            .map { responseResult in
-                responseResult.flatMapError { (error: APIError) -> Result<Either<CurrentWeather, ErrorResponse>, APIError> in
-                    if case let .couldNotDeserialize(data, _) = error {
-                        return deserialize(into: ErrorResponse.self)(data)
-                            .map { $0 |> toEither(withL: CurrentWeather.self) }
-                    } else {
-                        return .failure(error)
-                    }
-                }
+            .map(deserialize(into: CurrentWeather.self))
+            .map(toEither(withR: ErrorResponse.self))
+            .map { (error: APIError) -> Result<Either<CurrentWeather, ErrorResponse>, APIError> in
+                guard case let .couldNotDeserialize(data, _) = error else { return .failure(error) }
+                return deserialize(into: ErrorResponse.self)(data).map(toEither(withL: CurrentWeather.self))
             }.run { elem in
                 print(elem)
             }
         
-        
-        
-//        fetchCurrentWeather(for: .warsaw) {
-//            let asd = $0.map { data in
-//                deserialize(into: CurrentWeather.self)(data)
-//                    .map { Either<CurrentWeather, ErrorResponse>.left($0) }
-//                    .flatMapError { (error: APIError) -> Result<Either<CurrentWeather, ErrorResponse>, APIError> in
-//                        if case let .couldNotDeserialize(data, _) = error {
-//                            return deserialize(into: ErrorResponse.self)(data)
-//                                .map {
-//                                    Either<CurrentWeather, ErrorResponse>.right($0)
-//                                }
-//                        } else {
-//                            return .failure(error)
-//                        }
-//                }
-//            }
-//            print(asd)
-//        }
         return true
     }
 }

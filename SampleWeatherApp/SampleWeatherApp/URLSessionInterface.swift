@@ -15,13 +15,14 @@ protocol URLSessionDataTaskInterface {
 extension URLSessionDataTask: URLSessionDataTaskInterface {}
 
 protocol URLSessionInterface {
-    func data(with request: URLRequest,
-              completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTaskInterface
+    func data(with request: URLRequest) -> Parallel<(Data?, URLResponse?, Error?), URLSessionDataTaskInterface>
 }
 
 extension URLSession: URLSessionInterface {
-    func data(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTaskInterface {
-        return dataTask(with: request, completionHandler: completionHandler)
+    func data(with request: URLRequest) -> Parallel<(Data?, URLResponse?, Error?), URLSessionDataTaskInterface> {
+        return Parallel { completionHandler in
+            return self.dataTask(with: request, completionHandler: completionHandler)
+        }
     }
 }
 

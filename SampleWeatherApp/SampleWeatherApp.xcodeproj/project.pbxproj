@@ -14,6 +14,8 @@
 		2565321D2207FD58001EBFBF /* FunctionalBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2565321C2207FD58001EBFBF /* FunctionalBase.swift */; };
 		257A9757220D3BEA003DBB4E /* Parallel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257A9756220D3BEA003DBB4E /* Parallel.swift */; };
 		257A975B220D4BD1003DBB4E /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257A975A220D4BD1003DBB4E /* Either.swift */; };
+		257A975D220F2E88003DBB4E /* Parallel+ResultTransformers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257A975C220F2E88003DBB4E /* Parallel+ResultTransformers.swift */; };
+		257A975F220F4374003DBB4E /* Result+ParallelTransformers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257A975E220F4374003DBB4E /* Result+ParallelTransformers.swift */; };
 		259947C4220A1BE000FB64C3 /* Deserialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259947C3220A1BE000FB64C3 /* Deserialization.swift */; };
 		884578EE20FB72D00021A102 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 884578ED20FB72D00021A102 /* AppDelegate.swift */; };
 		884578F520FB72D10021A102 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 884578F420FB72D10021A102 /* Assets.xcassets */; };
@@ -87,6 +89,8 @@
 		2565321C2207FD58001EBFBF /* FunctionalBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FunctionalBase.swift; sourceTree = "<group>"; };
 		257A9756220D3BEA003DBB4E /* Parallel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parallel.swift; sourceTree = "<group>"; };
 		257A975A220D4BD1003DBB4E /* Either.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Either.swift; sourceTree = "<group>"; };
+		257A975C220F2E88003DBB4E /* Parallel+ResultTransformers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Parallel+ResultTransformers.swift"; sourceTree = "<group>"; };
+		257A975E220F4374003DBB4E /* Result+ParallelTransformers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Result+ParallelTransformers.swift"; sourceTree = "<group>"; };
 		259947C3220A1BE000FB64C3 /* Deserialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deserialization.swift; sourceTree = "<group>"; };
 		884578EA20FB72D00021A102 /* SampleWeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleWeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		884578ED20FB72D00021A102 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -159,6 +163,8 @@
 				257A975A220D4BD1003DBB4E /* Either.swift */,
 				2565321A2207F7BC001EBFBF /* Result.swift */,
 				257A9756220D3BEA003DBB4E /* Parallel.swift */,
+				257A975C220F2E88003DBB4E /* Parallel+ResultTransformers.swift */,
+				257A975E220F4374003DBB4E /* Result+ParallelTransformers.swift */,
 			);
 			path = Containers;
 			sourceTree = "<group>";
@@ -355,6 +361,7 @@
 				TargetAttributes = {
 					884578E920FB72D00021A102 = {
 						CreatedOnToolsVersion = 9.4.1;
+						LastSwiftMigration = 1010;
 					};
 					884578FD20FB72D10021A102 = {
 						CreatedOnToolsVersion = 9.4.1;
@@ -362,6 +369,7 @@
 					};
 					8845792820FB7F770021A102 = {
 						CreatedOnToolsVersion = 9.4.1;
+						LastSwiftMigration = 1010;
 					};
 					8845793020FB7F770021A102 = {
 						CreatedOnToolsVersion = 9.4.1;
@@ -465,6 +473,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2565321922041017001EBFBF /* URLSessionInterface.swift in Sources */,
+				257A975D220F2E88003DBB4E /* Parallel+ResultTransformers.swift in Sources */,
 				259947C4220A1BE000FB64C3 /* Deserialization.swift in Sources */,
 				2565321B2207F7BC001EBFBF /* Result.swift in Sources */,
 				884578EE20FB72D00021A102 /* AppDelegate.swift in Sources */,
@@ -473,6 +482,7 @@
 				257A9757220D3BEA003DBB4E /* Parallel.swift in Sources */,
 				257A975B220D4BD1003DBB4E /* Either.swift in Sources */,
 				2565321522040FAD001EBFBF /* NetworkClient.swift in Sources */,
+				257A975F220F4374003DBB4E /* Result+ParallelTransformers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -669,7 +679,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kosowski.ka.SampleWeatherApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -692,7 +702,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kosowski.ka.SampleWeatherApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -768,7 +778,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = kosowski.ka.SampleWeatherFramework;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -796,7 +806,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = kosowski.ka.SampleWeatherFramework;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";

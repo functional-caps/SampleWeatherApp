@@ -33,22 +33,11 @@ enum Result<ValueType, ErrorType> {
         case let .failure(error): return f(error)
         }
     }
-}
-
-extension Result where ValueType == Void {
-    func handleError(_ f: (ErrorType) -> Void) {
+    
+    func recover(_ f: (ErrorType) -> ValueType) -> ValueType {
         switch self {
-        case .success: break
-        case .failure(let error): f(error)
-        }
-    }
-}
-
-func handleError<V, E>(_ f: @escaping (E) -> Void) -> (Result<V, E>) -> Void {
-    return { result in
-        switch result {
-        case .success: break
-        case .failure(let error): f(error)
+        case let .success(value): return value
+        case let .failure(error): return f(error)
         }
     }
 }

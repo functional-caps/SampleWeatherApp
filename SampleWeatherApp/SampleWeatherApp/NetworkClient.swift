@@ -29,43 +29,15 @@ enum City: String {
     case warsaw = "Warsaw"
 }
 
-//func fetchCurrentWeather(using environment: Environment = Current,
-//                         for city: City,
-//                         completion: @escaping (Result<Data, APIError>) -> Void) {
-//
-//    currentWeatherRequest(for: city)
-//    |> map { urlRequest in
-//        environment.session.data(with: urlRequest) { data, _, error in
-//            data |> resultFromOptional(with: APIError.from(error)) |> completion
-//        }
-//    }
-//    >>> map {
-//        $0.resume()
-//    }
-//    >>> handleError { error in
-//        completion(.failure(error))
-//    }
-//
-//}
-
 func fetchCurrentWeather(using environment: Environment = Current,
                          for city: City) -> Completion<Result<Data, APIError>> {
-    return Completion { completion in
-        currentWeatherRequest(for: city)
-            |> map { urlRequest in
-                environment.session.data(with: urlRequest) { data, _, error in
-                    data |> resultFromOptional(with: APIError.from(error)) |> completion
-                }
-            }
-            >>> map {
-                $0.resume()
-            }
-            >>> handleError { error in
-                completion(.failure(error))
-        }
-    }
+    
+    return currentWeatherRequest(for: city)
+        .map(environment.session.data(with:))
+        .map(parseResponse)
+        .map(toCompletion { $0.resume() })
+        .recover { error in Completion<Result<Data, APIError>> { completion in completion(.failure(error)) }}
 }
-
 
 // MARK: - Implementation
 
@@ -90,29 +62,6 @@ fileprivate func currentWeatherRequest(for city: City) -> Result<URLRequest, API
     return city |> currentWeatherUrl >>> map(urlRequest)
 }
 
-
-// TODO
-// 1. Zrobić jeden request funkcyjnie
-// 2. Zrobić pusty ViewController i najprostszy ViewModel (o ile trzeba, może ViewModel też może być funkcją?)
-// 3. Zrobić Environment i użyć go np. do podawania URLSession
-
-// Szkic z funkcjami
-
-//        let request = addHeaders >>> addBody >>> setMethod // (Request) -> Request
-//
-//        iosify // (Request) -> URLRequest
-//
-//        service // (URLRequest) -> Data
-//
-//        deserializer // (Data) -> JSON
-//
-//        let fetchingForecast = request >>> iosify >>> service(APIconf) >>> deserializer(Forecast) // (Request) -> JSON
-//
-//        let data = Request() |> fetchingForecast // JSON
-
-// Szkic z konfiguracjami na enumach? Co może być sensowną konfiguracją, a co powinno być funkcją?
-
-//        request >>> iosify >>> service(APIconf) /* (Request) -> (DeserializationVariant -> Data) */
-//            >>> deserializer(Forecast) // one of three variants: foo: (Data) -> Int, bar: (Data) -> String, baz: (Data) -> Void
-
-// Może taki patern jako fileprivate
+fileprivate func parseResponse(data: Data?, response: URLResponse?, error: Error?) -> Result<Data, APIError> {
+    return data |> resultFromOptional(with: APIError.from(error))
+}
