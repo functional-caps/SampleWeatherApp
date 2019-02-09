@@ -1,11 +1,3 @@
-import SampleWeatherFramework
-import UIKit
-
-@UIApplicationMain
-final class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    private let window: UIWindow = UIWindow(frame: UIScreen.main.bounds)
-    
     //
     // TODO
     //
@@ -50,22 +42,3 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     //            >>> deserializer(Forecast) // one of three variants: foo: (Data) -> Int, bar: (Data) -> String, baz: (Data) -> Void
     
     // Może taki patern jako fileprivate
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-        window.rootViewController = ViewController()
-        window.makeKeyAndVisible()
-        
-        fetchCurrentWeather(for: .warsaw)
-            .map(deserialize(into: CurrentWeather.self))
-            .map(toEither(withR: ErrorResponse.self))
-            .map { (error: APIError) -> Result<Either<CurrentWeather, ErrorResponse>, APIError> in
-                guard case let .couldNotDeserialize(data, _) = error else { return .failure(error) }
-                return deserialize(into: ErrorResponse.self)(data).map(toEither(withL: CurrentWeather.self))
-            }.run { elem in
-                print(elem)
-            }
-        
-        return true
-    }
-}

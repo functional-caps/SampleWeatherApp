@@ -27,5 +27,13 @@ extension URLSession: URLSessionInterface {
 }
 
 enum URLSessionProvider {
-    static var production: URLSessionInterface { return URLSession.shared }
+    static var production: URLSessionInterface {
+        print("using production url session")
+        return URLSession.shared
+    }
+    
+    static var mock: URLSessionInterface {
+        print("using mock url session")
+        return URLSessionMock()
+    }
 }

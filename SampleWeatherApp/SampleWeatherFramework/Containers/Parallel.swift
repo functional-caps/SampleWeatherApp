@@ -16,7 +16,7 @@ struct Parallel<A, B> {
 
 extension Parallel {
     func map<C>(_ f: @escaping (A) -> C) -> Parallel<C, B> {
-        return self |> (SampleWeatherApp.map <| f)
+        return self |> (SampleWeatherFramework.map <| f)
     }
 }
 
@@ -33,7 +33,7 @@ func map<A, B, C>(_ f: @escaping (A) -> B) -> (Parallel<A, C>) -> Parallel<B, C>
 
 extension Parallel {
     func flatMap<C>(_ f: @escaping (A) -> Parallel<C, B>) -> Parallel<C, B> {
-        return self |> (SampleWeatherApp.flatMap <| f)
+        return self |> (SampleWeatherFramework.flatMap <| f)
     }
 }
 
@@ -52,7 +52,7 @@ func flatMap<A, B, C>(_ f: @escaping (A) -> Parallel<B, C>) -> (Parallel<A, C>) 
 
 extension Parallel {
     func toCompletion(_ f: @escaping (B) -> Void) -> Completion<A> {
-        return self |> SampleWeatherApp.toCompletion(f)
+        return self |> SampleWeatherFramework.toCompletion(f)
     }
 }
 

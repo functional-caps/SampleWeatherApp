@@ -1,5 +1,5 @@
 //
-//  FunctionalBase.swift
+//  Operators.swift
 //  SampleWeatherApp
 //
 //  Created by Private Siejkowski on 04/02/2019.

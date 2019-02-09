@@ -13,11 +13,11 @@ enum Result<ValueType, ErrorType> {
     case failure(ErrorType)
     
     func map<V>(_ f: @escaping (ValueType) -> V) -> Result<V, ErrorType> {
-        return self |> SampleWeatherApp.map(f)
+        return self |> SampleWeatherFramework.map(f)
     }
     
     func flatMap<V>(_ f: @escaping (ValueType) -> Result<V, ErrorType>) -> Result<V, ErrorType> {
-        return self |> SampleWeatherApp.flatMap(f)
+        return self |> SampleWeatherFramework.flatMap(f)
     }
     
     func mapError<E>(_ f: (ErrorType) -> E) -> Result<ValueType, E> {
