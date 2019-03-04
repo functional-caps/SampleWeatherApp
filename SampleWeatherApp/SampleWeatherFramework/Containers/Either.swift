@@ -13,13 +13,13 @@ enum Either<L, R> {
     case right(R)
 }
 
-func toEither<V, T>(withR: T.Type) -> (V) -> Either<V, T> {
+func toEither<V, T>(withRight: T.Type) -> (V) -> Either<V, T> {
     return { v in
         return .left(v)
     }
 }
 
-func toEither<V, T>(withL: T.Type) -> (V) -> Either<T, V> {
+func toEither<V, T>(withLeft: T.Type) -> (V) -> Either<T, V> {
     return { v in
         return .right(v)
     }

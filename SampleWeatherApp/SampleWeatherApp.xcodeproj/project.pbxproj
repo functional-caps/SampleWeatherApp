@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2562D401222CF25D00007497 /* DeserializationSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2562D400222CF25D00007497 /* DeserializationSpec.swift */; };
 		257A9767220F478A003DBB4E /* NetworkClientSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8845790220FB72D10021A102 /* NetworkClientSpec.swift */; };
 		257A9768220F4791003DBB4E /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2565321422040FAD001EBFBF /* NetworkClient.swift */; };
 		257A9769220F479B003DBB4E /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2565321622040FCA001EBFBF /* Environment.swift */; };
@@ -84,6 +85,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2562D400222CF25D00007497 /* DeserializationSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeserializationSpec.swift; sourceTree = "<group>"; };
 		2565321422040FAD001EBFBF /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
 		2565321622040FCA001EBFBF /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
 		2565321822041017001EBFBF /* URLSessionInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionInterface.swift; sourceTree = "<group>"; };
@@ -187,6 +189,7 @@
 			isa = PBXGroup;
 			children = (
 				259947C3220A1BE000FB64C3 /* Deserialization.swift */,
+				2562D400222CF25D00007497 /* DeserializationSpec.swift */,
 				2565321422040FAD001EBFBF /* NetworkClient.swift */,
 				8845790220FB72D10021A102 /* NetworkClientSpec.swift */,
 				2565321822041017001EBFBF /* URLSessionInterface.swift */,
@@ -523,6 +526,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2562D401222CF25D00007497 /* DeserializationSpec.swift in Sources */,
 				257A9767220F478A003DBB4E /* NetworkClientSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

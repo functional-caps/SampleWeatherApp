@@ -32,8 +32,10 @@ enum URLSessionProvider {
         return URLSession.shared
     }
     
+    static var internalMock = URLSessionMock()
+    
     static var mock: URLSessionInterface {
         print("using mock url session")
-        return URLSessionMock()
+        return internalMock
     }
 }

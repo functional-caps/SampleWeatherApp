@@ -3,7 +3,7 @@
     //
     // ✅ Zmienić completion blocki na paralele, bo teraz jest siara i w compeltion bloku część logiki siedzi osobno
     //
-    // Dopisać testy i zobaczyć, gdzie ssie testowanie
+    // ✅ Dopisać testy i zobaczyć, gdzie ssie testowanie
     //
     // Playground pod widoki z podpiętym frameworkiem aplikacji -> setup tego
     //

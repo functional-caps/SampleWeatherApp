@@ -8,10 +8,10 @@ final public class ViewController: UIViewController {
         
         fetchCurrentWeather(for: .warsaw)
             .map(deserialize(into: CurrentWeather.self))
-            .map(toEither(withR: ErrorResponse.self))
+            .map(toEither(withRight: ErrorResponse.self))
             .map { (error: APIError) -> Result<Either<CurrentWeather, ErrorResponse>, APIError> in
                 guard case let .couldNotDeserialize(data, _) = error else { return .failure(error) }
-                return deserialize(into: ErrorResponse.self)(data).map(toEither(withL: CurrentWeather.self))
+                return deserialize(into: ErrorResponse.self)(data).map(toEither(withLeft: CurrentWeather.self))
             }.run { elem in
                 print(elem)
         }

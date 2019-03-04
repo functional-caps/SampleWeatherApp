@@ -16,22 +16,42 @@ final class URLSessionDataTaskMock: URLSessionDataTaskInterface {
 }
 
 final class URLSessionMock: URLSessionInterface {
+        
+    private var currentReturn: Parallel<(Data?, URLResponse?, Error?), URLSessionDataTaskInterface> =
+        Parallel { completion in
+            let task = URLSessionDataTaskMock()
+            task.callOnResume = { completion((nil,nil,nil)) }
+            return task
+        }
     
-    var sampleCurrentWeatherResponse: String {
-        return "{\"coord\":{\"lon\":21.01,\"lat\":52.23},\"weather\":[{\"id\":803,\"main\":\"Clouds\",\"description\":\"broken clouds\",\"icon\":\"04n\"}],\"base\":\"stations\",\"main\":{\"temp\":273.62,\"pressure\":1025,\"humidity\":86,\"temp_min\":273.15,\"temp_max\":274.15},\"visibility\":10000,\"wind\":{\"speed\":2.6,\"deg\":250},\"clouds\":{\"all\":75},\"dt\":1549425600,\"sys\":{\"type\":1,\"id\":1713,\"message\":0.0038,\"country\":\"PL\",\"sunrise\":1549433321,\"sunset\":1549467125},\"id\":756135,\"name\":\"Warszawa\",\"cod\":200}"
-    }
-    
-    func data(with request: URLRequest) -> Parallel<(Data?, URLResponse?, Error?), URLSessionDataTaskInterface> {
-        return Parallel { completion in
+    func `return`(response: String) {
+        currentReturn = Parallel { completion in
             let task = URLSessionDataTaskMock()
             task.callOnResume = {
                 let completionArgs: (Data?, URLResponse?, Error?) = (
-                    self.sampleCurrentWeatherResponse.data(using: .utf8)!, nil, nil
+                    response.data(using: .utf8)!, nil, nil
                 )
                 completion(completionArgs)
             }
             return task
         }
+    }
+    
+    func `return`(error: Error) {
+        currentReturn = Parallel { completion in
+            let task = URLSessionDataTaskMock()
+            task.callOnResume = {
+                let completionArgs: (Data?, URLResponse?, Error?) = (
+                    nil, nil, error
+                )
+                completion(completionArgs)
+            }
+            return task
+        }
+    }
+    
+    func data(with request: URLRequest) -> Parallel<(Data?, URLResponse?, Error?), URLSessionDataTaskInterface> {
+        return currentReturn
     }
     
 }
