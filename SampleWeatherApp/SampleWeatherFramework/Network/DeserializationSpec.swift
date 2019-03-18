@@ -17,7 +17,14 @@ class DeserializationSpec: QuickSpec { override func spec() {
     describe("Deserialization") {
         context("") {
             it("") {
+                let data = """
+                           { "cod": "testCod", "message": "testMessage" }
+                           """.data(using: .utf8)!
                 
+                let result = data
+                |> deserialize(into: ErrorResponse.self)
+                
+                expect(result).to(equal(Result<ErrorResponse, APIError>.success(ErrorResponse(cod: "testCod", message: "testMessage"))))
             }
         }
     }

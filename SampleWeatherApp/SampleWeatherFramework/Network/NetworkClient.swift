@@ -25,6 +25,19 @@ enum APIError: Error {
     }
 }
 
+extension APIError: Equatable {
+
+    static func ==(lhs: APIError, rhs: APIError) -> Bool {
+        switch (lhs, rhs) {
+        case (.unknownError, .unknownError), (.malformedURL, .malformedURL): return true
+        case let (.urlSessionError(le), .urlSessionError(re)): return le == re
+        case let (.couldNotDeserialize(ld, _), .couldNotDeserialize(rd, _)): return ld == rd
+        default: return false
+        }
+    }
+
+}
+
 enum City: String {
     case warsaw = "Warsaw"
 }

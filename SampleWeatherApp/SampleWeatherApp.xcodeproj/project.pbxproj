@@ -99,6 +99,7 @@
 		257A977C220F511A003DBB4E /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		257A9781220F58D7003DBB4E /* UrlSessionInterfaceMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlSessionInterfaceMock.swift; sourceTree = "<group>"; };
 		259947C3220A1BE000FB64C3 /* Deserialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deserialization.swift; sourceTree = "<group>"; };
+		25B90C44223EBD1800C8A2EE /* SampleWeatherAppPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = SampleWeatherAppPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		884578EA20FB72D00021A102 /* SampleWeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleWeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		884578ED20FB72D00021A102 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		884578EF20FB72D00021A102 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -233,6 +234,7 @@
 		884578E120FB72D00021A102 = {
 			isa = PBXGroup;
 			children = (
+				25B90C44223EBD1800C8A2EE /* SampleWeatherAppPlayground.playground */,
 				884578EC20FB72D00021A102 /* SampleWeatherApp */,
 				8845792A20FB7F770021A102 /* SampleWeatherFramework */,
 				884578EB20FB72D00021A102 /* Products */,

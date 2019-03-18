@@ -1,17 +1,32 @@
     //
     // TODO
     //
-    // ✅ Zmienić completion blocki na paralele, bo teraz jest siara i w compeltion bloku część logiki siedzi osobno
+    // Przejrzeć implementacje z Prelude typowych typów
     //
-    // ✅ Dopisać testy i zobaczyć, gdzie ssie testowanie
-    //
-    // Playground pod widoki z podpiętym frameworkiem aplikacji -> setup tego
-    //
+    // Czy można wyciągnąć Environment jako framework?
+    // 
     // Widok: search + table view
     //
     // dorzucić request na forecast
     //
     
+    
+    
+    //
+    // TODO
+    //
+    // ✅ Zmienić completion blocki na paralele, bo teraz jest siara i w compeltion bloku część logiki siedzi osobno
+    //
+    // ✅ Dopisać testy i zobaczyć, gdzie ssie testowanie
+    //
+    // ✅ Playground pod widoki z podpiętym frameworkiem aplikacji -> setup tego
+    //
+    // 🚫 Widok: search + table view
+    //
+    // 🚫 dorzucić request na forecast
+    //
+    
+
     
     
     

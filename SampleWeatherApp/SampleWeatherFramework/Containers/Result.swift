@@ -77,3 +77,13 @@ func resultFromThrowing<V>(throwing: () throws -> V) -> Result<V, Error> {
         return .failure(error)
     }
 }
+
+extension Result: Equatable where ValueType: Equatable, ErrorType: Equatable {
+    static func == (left: Result<ValueType, ErrorType>, right: Result<ValueType, ErrorType>) -> Bool {
+        switch (left, right) {
+        case (.success, .failure), (.failure, .success): return false
+        case let (.success(l), .success(r)): return l == r
+        case let (.failure(l), .failure(r)): return l == r
+        }
+    }
+}
