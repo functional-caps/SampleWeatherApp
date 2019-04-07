@@ -5,7 +5,7 @@
     //
     // Czy można wyciągnąć Environment jako framework?
     // 
-    // Widok: search + table view
+    // ✅ Widok: search + table view
     //
     // dorzucić request na forecast
     //
@@ -21,7 +21,7 @@
     //
     // ✅ Playground pod widoki z podpiętym frameworkiem aplikacji -> setup tego
     //
-    // 🚫 Widok: search + table view
+    // ✅ Widok: search + table view
     //
     // 🚫 dorzucić request na forecast
     //

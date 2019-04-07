@@ -35,7 +35,7 @@ struct MainWeather: Decodable {
 
 struct Wind: Decodable {
     let speed: Double
-    let deg: Int
+    let deg: Double
 }
 
 struct Clouds: Decodable {
@@ -62,7 +62,55 @@ struct CurrentWeather: Decodable {
     let sys: Sys
     let id: Int
     let name: String
-    let cod: Int
+    let cod: String
+}
+
+//{\"dt\":1554649200,\"main\":{\"temp\":290.02,\"temp_min\":287.891,\"temp_max\":290.02,\"pressure\":1007.46,\"sea_level\":1007.46,\"grnd_level\":995.66,\"humidity\":68,\"temp_kf\":2.13},\"weather\":[{\"id\":800,\"main\":\"Clear\",\"description\":\"clear sky\",\"icon\":\"01d\"}],\"clouds\":{\"all\":0},\"wind\":{\"speed\":2.16,\"deg\":3.00305},\"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2019-04-07 15:00:00\"}
+
+struct MainForecastWeather: Decodable {
+    let temp: Double
+    let temp_min: Double
+    let temp_max: Double
+    let pressure: Double
+    let sea_level: Double
+    let grnd_level: Double
+    let humidity: Int
+    let temp_kf: Double
+}
+
+struct ForecastSys: Decodable {
+    let pod: String
+}
+
+struct Rain: Decodable {
+//    let 3h: String
+}
+
+struct ForecastSample: Decodable {
+    let dt: Int
+    let main: MainForecastWeather
+    let weather: [Weather]
+    let clouds: Clouds
+    let wind: Wind
+    let sys: ForecastSys
+    let dt_txt: String
+    let rain: Rain?
+}
+
+struct ForecastCity: Decodable {
+    let id: Int
+    let name: String
+    let coord: Coordinates
+    let country: String
+    let population: Int
+}
+
+struct ForecastWeather: Decodable {
+    let cod: String
+    let message: Double
+    let cnt: Int
+    let list: [ForecastSample]
+    let city: ForecastCity
 }
 
 func deserialize<T>(into: T.Type) -> (_ data: Data) -> Result<T, APIError> where T: Decodable {

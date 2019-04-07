@@ -10,7 +10,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         
-        window.rootViewController = ViewController()
+        window.rootViewController = provideRootViewController()
         window.makeKeyAndVisible()
         
         return true

@@ -35,11 +35,10 @@ extension APIError: Equatable {
         default: return false
         }
     }
-
 }
 
 enum City: String {
-    case warsaw = "Warsaw"
+    case warsaw = "Warsaw,pl"
 }
 
 func fetchCurrentWeather(using environment: Environment = Current,
@@ -52,10 +51,24 @@ func fetchCurrentWeather(using environment: Environment = Current,
         .recover { error in Completion<Result<Data, APIError>> { completion in completion(.failure(error)) }}
 }
 
+func fetchForecastWeather(using environment: Environment = Current,
+                          for city: City) -> Completion<Result<Data, APIError>> {
+    
+    return forecastWeatherRequest(for: city)
+        .map(environment.session.data(with:))
+        .map(parseResponse)
+        .map(toCompletion { $0.resume() })
+        .recover { error in Completion<Result<Data, APIError>> { completion in completion(.failure(error)) }}
+}
+
 // MARK: - Implementation
 
 fileprivate func currentWeatherUrlString(for city: City) -> String {
     return "https://api.openweathermap.org/data/2.5/weather?q=\(city.rawValue)"
+}
+
+fileprivate func forecastWeatherUrlString(for city: City) -> String {
+    return "https://api.openweathermap.org/data/2.5/forecast?q=\(city.rawValue)"
 }
 
 fileprivate func addAuthentication(to urlString: String) -> String {
@@ -63,16 +76,17 @@ fileprivate func addAuthentication(to urlString: String) -> String {
     return "\(urlString)&appid=\(apiKey)"
 }
 
-fileprivate func currentWeatherUrl(for city: City) -> Result<URL, APIError> {
-    return city |> currentWeatherUrlString >>> addAuthentication >>> URL.init(string:) >>> resultFromOptional(with: APIError.malformedURL)
-}
-
-fileprivate func urlRequest(url: URL) -> URLRequest {
-    return URLRequest(url: url)
-}
+let toAuthenticatedUrl = addAuthentication
+    >>> URL.init(string:)
+    >>> resultFromOptional(with: APIError.malformedURL)
+    >>> map { URLRequest.init(url: $0) }
 
 fileprivate func currentWeatherRequest(for city: City) -> Result<URLRequest, APIError> {
-    return city |> currentWeatherUrl >>> map(urlRequest)
+    return city |> currentWeatherUrlString >>> toAuthenticatedUrl
+}
+
+fileprivate func forecastWeatherRequest(for city: City) -> Result<URLRequest, APIError> {
+    return city |> forecastWeatherUrlString >>> toAuthenticatedUrl
 }
 
 fileprivate func parseResponse(data: Data?, response: URLResponse?, error: Error?) -> Result<Data, APIError> {

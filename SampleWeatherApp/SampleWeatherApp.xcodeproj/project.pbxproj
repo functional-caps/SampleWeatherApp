@@ -23,6 +23,7 @@
 		257A9776220F49E3003DBB4E /* Quick.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8845791E20FB7D1F0021A102 /* Quick.framework */; };
 		257A977D220F511A003DBB4E /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257A977C220F511A003DBB4E /* main.swift */; };
 		257A9783220F5B40003DBB4E /* UrlSessionInterfaceMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257A9781220F58D7003DBB4E /* UrlSessionInterfaceMock.swift */; };
+		25829B0B225A1FDD007B3768 /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25829B0A225A1FDD007B3768 /* SearchViewController.swift */; };
 		884578EE20FB72D00021A102 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 884578ED20FB72D00021A102 /* AppDelegate.swift */; };
 		884578F520FB72D10021A102 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 884578F420FB72D10021A102 /* Assets.xcassets */; };
 		884578F820FB72D10021A102 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 884578F620FB72D10021A102 /* LaunchScreen.storyboard */; };
@@ -98,6 +99,7 @@
 		257A9764220F46B9003DBB4E /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
 		257A977C220F511A003DBB4E /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		257A9781220F58D7003DBB4E /* UrlSessionInterfaceMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlSessionInterfaceMock.swift; sourceTree = "<group>"; };
+		25829B0A225A1FDD007B3768 /* SearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
 		259947C3220A1BE000FB64C3 /* Deserialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deserialization.swift; sourceTree = "<group>"; };
 		25B90C44223EBD1800C8A2EE /* SampleWeatherAppPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = SampleWeatherAppPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		884578EA20FB72D00021A102 /* SampleWeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleWeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -227,6 +229,7 @@
 			isa = PBXGroup;
 			children = (
 				884578EF20FB72D00021A102 /* ViewController.swift */,
+				25829B0A225A1FDD007B3768 /* SearchViewController.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -517,6 +520,7 @@
 				257A976B220F479B003DBB4E /* Deserialization.swift in Sources */,
 				257A9783220F5B40003DBB4E /* UrlSessionInterfaceMock.swift in Sources */,
 				257A9769220F479B003DBB4E /* Environment.swift in Sources */,
+				25829B0B225A1FDD007B3768 /* SearchViewController.swift in Sources */,
 				257A9768220F4791003DBB4E /* NetworkClient.swift in Sources */,
 				257A976E220F479B003DBB4E /* Result.swift in Sources */,
 				257A976C220F479B003DBB4E /* Operators.swift in Sources */,

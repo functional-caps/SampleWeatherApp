@@ -7,10 +7,19 @@
 //
 
 import Foundation
+import UIKit
 
 let isInProduction = NSClassFromString("XCTestCase") == nil
 
 let Current: Environment = isInProduction ? .production : .mock
+
+public func provideRootViewController() -> UIViewController {
+    let result = ViewController()
+    let search = UISearchController(searchResultsController: result)
+    let container = SearchViewController(searchController: search)
+    let navigation = UINavigationController(rootViewController: container)
+    return navigation
+}
 
 struct Environment {
     
