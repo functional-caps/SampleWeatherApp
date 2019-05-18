@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<playground version='6.0' target-platform='ios' executeOnSourceChanges='false'>
+<playground version='6.0' target-platform='ios'>
     <pages>
         <page name='LiveView'/>
         <page name='1. Functions'/>
@@ -27,5 +27,6 @@
         <page name='23. The Many Faces of Zip — Part 1'/>
         <page name='24. The Many Faces of Zip — Part 2'/>
         <page name='25. The Many Faces of Zip — Part 3'/>
+        <page name='26. Domain Specific Languages — Part 1'/>
     </pages>
 </playground>
