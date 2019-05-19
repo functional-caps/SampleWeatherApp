@@ -7,7 +7,7 @@ enum Expr: Equatable {
     case `var`(String)
     indirect case add(Expr, Expr)
     indirect case mul(Expr, Expr)
-    indirect case bind(String, to: Expr, in: Expr)
+    indirect case bind([String: Expr], in: Expr)
 }
 
 extension Expr: ExpressibleByIntegerLiteral {
@@ -19,6 +19,16 @@ extension Expr: ExpressibleByIntegerLiteral {
 extension Expr: ExpressibleByStringLiteral {
     init(stringLiteral value: String) {
         self = .var(value)
+    }
+}
+
+extension Expr {
+    static func + (lhs: Expr, rhs: Expr) -> Expr {
+        return .add(lhs, rhs)
+    }
+    
+    static func * (lhs: Expr, rhs: Expr) -> Expr {
+        return .mul(lhs, rhs)
     }
 }
 
@@ -34,9 +44,12 @@ func eval(_ expr: Expr, with values: [String: Int] = [:]) -> Int? {
         return first * second
     case .var(let name):
         return values[name]
-    case let .bind(id, to: boundExpr, in: scopedExpr):
-        guard let boundValue = eval(boundExpr, with: values) else { return nil }
-        let newValues = values.merging([id: boundValue], uniquingKeysWith: { $1 })
+    case let .bind(bindings, in: scopedExpr):
+        var newValues = values
+        for (name, boundExpr) in bindings {
+            guard let boundValue = eval(boundExpr, with: values) else { return nil }
+            newValues.merge([name: boundValue], uniquingKeysWith: { $1 })
+        }
         return eval(scopedExpr, with: newValues)
     }
 }
@@ -52,8 +65,11 @@ func print(_ expr: Expr) -> String {
         return "(\(print(lhs)) * \(print(rhs)))"
     case .var(let name):
         return name
-    case let .bind(id, boundExpr, scopedExpr):
-        return "(let \(id) = \(print(boundExpr)) in \(print(scopedExpr)))"
+    case let .bind(bindings, scopedExpr):
+        let boundString = bindings.map { key, value in
+            return "(let \(key) = \(print(value)))"
+        }.joined(separator: ", ")
+        return "(\(boundString) in \(print(scopedExpr)))"
     }
     
 }
@@ -92,12 +108,12 @@ func simplify(_ expr: Expr) -> Expr {
     }
 }
 
-let expr1 = Expr.mul(3, .bind("z", to: .add("x", 2), in: .mul("z", "z")))
+let expr1 = Expr.mul(3, .bind(["z": .add("x", 2)], in: .mul("z", "z")))
 print(expr1)
 
 eval(expr1, with: ["x": 4])
 
-let expr2 = Expr.bind("x", to: 4, in: .mul(3, .bind("z", to: .add("x", 2), in: .mul("z", "z"))))
+let expr2 = Expr.bind(["x": 4], in: .mul(3, .bind(["z": .add("x", 2)], in: .mul("z", "z"))))
 print(expr2)
 eval(expr2)
 
@@ -109,8 +125,29 @@ eval(expr2)
  
  */
 
+func actualInline(_ expr: Expr, bindings: [String: Expr]) -> Expr {
+    switch expr {
+    case let .bind(bounds, in: scoped):
+        var newBindings = bindings
+        for (name, bound) in bounds {
+            newBindings[name] = bound
+        }
+        return actualInline(scoped, bindings: bindings)
+    case let .add(lhs, rhs):
+        return .add(actualInline(lhs, bindings: bindings), actualInline(rhs, bindings: bindings))
+    case let .mul(lhs, rhs):
+        return .mul(actualInline(lhs, bindings: bindings), actualInline(rhs, bindings: bindings))
+    case .int: return expr
+    case .var(let name):
+        return bindings[name] ?? expr
+    }
+}
 
+func inline(_ expr: Expr) -> Expr {
+    return actualInline(expr, bindings: [:])
+}
 
+print(inline(expr1))
 
 /*
  
@@ -120,8 +157,16 @@ eval(expr2)
  
  */
 
+func freeVars(_ expr: Expr) -> Set<String> {
+    switch expr {
+    case .var(let name): return [name]
+    case .int: return []
+    case let .add(lhs, rhs), let .mul(lhs, rhs): return freeVars(lhs).union(freeVars(rhs))
+    case .bind: return freeVars(inline(expr))
+    }
+}
 
-
+freeVars(expr1)
 
 /*
  
@@ -131,8 +176,15 @@ eval(expr2)
  
  */
 
+infix operator .=
 
+extension Expr {
+    static func .= (name: String, bound: Expr) -> (Expr) -> Expr {
+        return { scoped in .bind([name: bound], in: scoped) }
+    }
+}
 
+print(("x" .= 3)("x" * 2 + 3))
 
 /*
  
@@ -142,8 +194,9 @@ eval(expr2)
  
  */
 
+// done?!
 
-
+print(.bind(["x": 2, "y": 5], in: .mul("x", "y")))
 
 /*
  
@@ -155,7 +208,24 @@ eval(expr2)
  
  */
 
-
+//func D(_ variable: String) -> (Expr) -> Expr {
+//    return { expr in
+//        switch expr {
+//        case .int(_):
+//            <#code#>
+//        case .var(_):
+//            <#code#>
+//        case .add(_, _):
+//            <#code#>
+//        case .mul(_, _):
+//            <#code#>
+//        case .bind(_, let in):
+//            <#code#>
+//        @unknown default:
+//            <#code#>
+//        }
+//    }
+//}
 
 
 /*
@@ -166,8 +236,21 @@ eval(expr2)
  
  */
 
-
-
+//func D(_ variable: String) -> (Expr) -> Expr {
+//    return { expr in
+//        switch expr {
+//        case .int:
+//            return .int(0)
+//        case .var(_):
+//            <#code#>
+//        case .add(_, _):
+//            <#code#>
+//        case .mul(_, _):
+//            <#code#>
+//        case .bind(_, _):
+//            <#code#>
+//    }
+//}
 
 /*
  
@@ -177,8 +260,22 @@ eval(expr2)
  
  */
 
-
-
+//func D(_ variable: String) -> (Expr) -> Expr {
+//    return { expr in
+//        switch expr {
+//        case .int:
+//            return .int(0)
+//        case .var(let name):
+//            guard name == variable else { return .int(0) }
+//            return .int(1)
+//        case .add(_, _):
+//            <#code#>
+//        case .mul(_, _):
+//            <#code#>
+//        case .bind(_, _):
+//            <#code#>
+//        }
+//}
 
 /*
  
@@ -188,8 +285,23 @@ eval(expr2)
  
  */
 
-
-
+//func D(_ variable: String) -> (Expr) -> Expr {
+//    return { expr in
+//        switch expr {
+//        case .int:
+//            return .int(0)
+//        case .var(let name):
+//            guard name == variable else { return .int(0) }
+//            return .int(1)
+//        case let .add(lhs, rhs):
+//            return D(variable)(lhs) + D(variable)(rhs)
+//        case .mul(_, _):
+//            <#code#>
+//        case .bind(_, _):
+//            <#code#>
+//        }
+//    }
+//}
 
 /*
  
@@ -199,8 +311,23 @@ eval(expr2)
  
  */
 
-
-
+//func D(_ variable: String) -> (Expr) -> Expr {
+//    return { expr in
+//        switch expr {
+//        case .int:
+//            return .int(0)
+//        case .var(let name):
+//            guard name == variable else { return .int(0) }
+//            return .int(1)
+//        case let .add(lhs, rhs):
+//            return D(variable)(lhs) + D(variable)(rhs)
+//        case let .mul(lhs, rhs):
+//            return D(variable)(lhs) * rhs + D(variable)(rhs) * lhs
+//        case .bind(_, _):
+//            <#code#>
+//        }
+//    }
+//}
 
 /*
  
@@ -212,8 +339,23 @@ eval(expr2)
  
  */
 
-
-
+//func D(_ variable: String) -> (Expr) -> Expr {
+//    return { expr in
+//        switch expr {
+//        case .int:
+//            return .int(0)
+//        case .var(let name):
+//            guard name == variable else { return .int(0) }
+//            return .int(1)
+//        case let .add(lhs, rhs):
+//            return D(variable)(lhs) + D(variable)(rhs)
+//        case let .mul(lhs, rhs):
+//            return D(variable)(lhs) * rhs + D(variable)(rhs) * lhs
+//        case .bind(_, _):
+//            <#code#>
+//        }
+//    }
+//}
 
 /*
  
