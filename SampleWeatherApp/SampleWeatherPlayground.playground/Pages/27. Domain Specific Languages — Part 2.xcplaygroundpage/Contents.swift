@@ -132,7 +132,7 @@ func actualInline(_ expr: Expr, bindings: [String: Expr]) -> Expr {
         for (name, bound) in bounds {
             newBindings[name] = bound
         }
-        return actualInline(scoped, bindings: bindings)
+        return actualInline(scoped, bindings: newBindings)
     case let .add(lhs, rhs):
         return .add(actualInline(lhs, bindings: bindings), actualInline(rhs, bindings: bindings))
     case let .mul(lhs, rhs):
@@ -339,23 +339,38 @@ print(.bind(["x": 2, "y": 5], in: .mul("x", "y")))
  
  */
 
-//func D(_ variable: String) -> (Expr) -> Expr {
-//    return { expr in
-//        switch expr {
-//        case .int:
-//            return .int(0)
-//        case .var(let name):
-//            guard name == variable else { return .int(0) }
-//            return .int(1)
-//        case let .add(lhs, rhs):
-//            return D(variable)(lhs) + D(variable)(rhs)
-//        case let .mul(lhs, rhs):
-//            return D(variable)(lhs) * rhs + D(variable)(rhs) * lhs
-//        case .bind(_, _):
-//            <#code#>
-//        }
-//    }
-//}
+func D(_ variable: String) -> (Expr) -> Expr {
+    return { expr in
+        switch expr {
+        case .int:
+            return .int(0)
+        case .var(let name):
+            guard name == variable else { return .int(0) }
+            return .int(1)
+        case let .add(lhs, rhs):
+            return D(variable)(lhs) + D(variable)(rhs)
+        case let .mul(lhs, rhs):
+            return D(variable)(lhs) * rhs + D(variable)(rhs) * lhs
+        case let .bind(bindings, scoped):
+            // what to do with multiple bindings?
+            // I DON'T KNOW!
+            var dfs: [Expr] = []
+            var dfout: Expr? = nil
+            for (_, bound) in bindings {
+                let Df = D(variable)(bound)
+                dfs.append(Df)
+                if let olddfout = dfout {
+                    dfout = olddfout * Df
+                } else {
+                    dfout = Df
+                }
+            }
+            let fDg = Expr.bind(bindings, in: D(variable)(scoped))
+            guard let unwrappeddfout = dfout else { fatalError() }
+            return unwrappeddfout * fDg
+        }
+    }
+}
 
 /*
  
@@ -365,8 +380,8 @@ print(.bind(["x": 2, "y": 5], in: .mul("x", "y")))
 
  */
 
-
-
-
+print(simplify(D("x")("x" * "x")))
+print(simplify(D("x")("x" * "x" * "x")))
+print(D("x")(2 * "x"))
  
 //: [Next](@next)
