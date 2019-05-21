@@ -71,7 +71,8 @@ let pf = header([
     img([src("https://example.com/img"), width(64), height(64)])
 ])
 
-func render(_ node: Node) -> String {
+func render(_ node: Node?) -> String {
+    guard let node = node else { return "" }
     switch node {
     case .text(let text):
         return text.replacingOccurrences(of: "\"", with: "\\\"")
@@ -160,19 +161,25 @@ print(render(a([href("/about")], ["Learn more"])))
  
  */
 
-func redacted(_ node: Node) -> Node {
-    switch node {
-    case .text(let value):
-        return .text(String(value.map { elem -> Character in
+extension String {
+    var redactified: String {
+        return String(map { elem -> Character in
             guard elem.isWhitespace else { return "█" }
             return elem
-        }))
-    case let .el(tag, attrs, children):
-        return .el(tag, attrs, children.map(redacted))
+        })
     }
 }
 
-// TODO: FINISH!
+func redacted(_ node: Node) -> Node {
+    switch node {
+    case .text(let value):
+        return .text(value.redactified)
+    case let .el(tag, attrs, children):
+        return .el(tag.redactified,
+                   attrs.map { ($0.0.redactified, $0.1.redactified) },
+                   children.map(redacted))
+    }
+}
 
 print(render(redacted(pf)))
 
@@ -184,9 +191,22 @@ print(render(redacted(pf)))
  
  */
 
+func removingStyles(_ node: Node) -> Node? {
+    switch node {
+    case .text:
+        return node
+    case .el("style", _, _):
+        return nil
+    case let .el(tag, attrs, children):
+        return .el(tag, attrs.filter { $0.0 != "style" }, children.compactMap(removingStyles))
+    }
+}
 
+print(render(removingStyles(.el("style", [], []))))
 
+print(render(removingStyles(.el("h1", [("style", "black")], []))))
 
+print(render(removingStyles(p([], [h1([("style", "black")], [])]))))
 
 /*
 
@@ -196,9 +216,24 @@ print(render(redacted(pf)))
  
  */
 
+func removingScripts(_ node: Node) -> Node? {
+    switch node {
+    case .text:
+        return node
+    case .el("script", _, _):
+        return nil
+    case let .el(tag, attrs, children):
+        return .el(tag,
+                   attrs.filter { !$0.0.starts(with: "on") },
+                   children.compactMap(removingScripts))
+    }
+}
 
+print(render(removingScripts(.el("script", [], []))))
 
+print(render(removingScripts(.el("h1", [("onClick", "black")], []))))
 
+print(render(removingScripts(p([], [h1([("onTouch", "black")], [])]))))
 
 /*
 
@@ -208,15 +243,35 @@ print(render(redacted(pf)))
  
  */
 
+func plainText(_ node: Node) -> String {
+    switch node {
+    case .text(let value): return value
+    case let .el(tag, _, children):
+        var prefix = ""
+        if tag == "p" || tag == "h1" { prefix = "\n" }
+        return "\(prefix)\(children.map(plainText).joined(separator: ""))"
+    }
+}
 
-
-
+print(plainText(pf))
 
 /*
 
  Exercise 9.
  
  One of the most popular way of rendering HTML is to use a templating language (Swift, for example, has Stencil). What are some of the pros and cons of using a templating language over a DSL.
+ 
+ */
+
+/*
+ 
+ Pros:
+ * ability to interpret the same template in various programming languages
+ * syntax can be better because we're not limited to the language syntax
+ 
+ Cons:
+ * writing interpreters for DSLs is way easier because we laverage the language compiler
+ * compiler helps with validating DSL
  
  */
 
