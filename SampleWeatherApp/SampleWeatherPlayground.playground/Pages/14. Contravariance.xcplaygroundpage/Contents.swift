@@ -377,9 +377,12 @@ struct Equate<A> { let equals: (A, A) -> Bool }
 
 func contramap<A, B>(_ f: @escaping (B) -> A) -> (Equate<A>) -> Equate<B> {
     let f2: ((B, B)) -> (A, A) = { (f($0.0), f($0.1)) }
-    return { equate in
+    return { equate -> Equate<B> in
         let result = f2 >>> equate.equals
-        return Equate(equals: result)
+        let betterResult: (B, B) -> Bool = { b1, b2 in
+            return result((b1, b2))
+        }
+        return Equate<B>(equals: betterResult)
     }
 }
 

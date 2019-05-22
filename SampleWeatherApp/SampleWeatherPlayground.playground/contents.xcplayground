@@ -31,5 +31,6 @@
         <page name='27. Domain Specific Languages — Part 2'/>
         <page name='28. HTML DSL'/>
         <page name='29. DSL vs Templating Language'/>
+        <page name='30. Composable Randomness'/>
     </pages>
 </playground>
