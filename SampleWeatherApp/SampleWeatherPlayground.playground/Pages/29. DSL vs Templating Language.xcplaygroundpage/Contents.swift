@@ -171,8 +171,20 @@ print(render(users(["Blob Jr.", "Blob", "Blob Sr."])))
  
  */
 
+func map<A, B>(_ f: @escaping (Node) -> B) -> (@escaping (A) -> Node) -> (A) -> B {
+    return { (af: @escaping (A) -> Node) -> (A) -> B in
+        return af >>> f
+    }
+}
 
+func contramap<A, B>(_ f: @escaping (B) -> A) -> (@escaping (A) -> Node) -> (B) -> Node {
+    return { (af: @escaping (A) -> Node) -> (B) -> Node in
+        return f >>> af
+    }
+}
 
+// map represents the transformation of node
+// contramap represents the transformation of node generation
 
 /*
 
@@ -184,8 +196,21 @@ print(render(users(["Blob Jr.", "Blob", "Blob Sr."])))
  
  */
 
+func nav(children: [Node]) -> Node {
+    return .el("nav", [], children)
+}
 
+func footer(children: [Node]) -> Node {
+    return .el("footer", [], children)
+}
 
+func shell(children: [Node]) -> Node {
+    return .el("div", [], children)
+}
+
+[[] |> header, [] |> nav, [] |> footer] |> shell
+
+// this form of view composition is just function calling
 
 /*
  
@@ -197,8 +222,18 @@ print(render(users(["Blob Jr.", "Blob", "Blob Sr."])))
  
  */
 
+func <> <A>(
+    f: @escaping (A) -> [Node],
+    g: @escaping (A) -> [Node]
+    ) -> (A) -> [Node] {
+    return { a in
+        let fNodes = f(a)
+        let gNodes = g(a)
+        return fNodes + gNodes
+    }
+}
 
-
+print(render(User(name: "Me", isAdmin: true) |> adminDetail <> adminDetail))
 
 /*
  
@@ -211,7 +246,9 @@ print(render(users(["Blob Jr.", "Blob", "Blob Sr."])))
  */
 
 
-
+struct ChildOf<T> {
+    let node: Node
+}
 
 /*
  
@@ -221,8 +258,8 @@ print(render(users(["Blob Jr.", "Blob", "Blob Sr."])))
  
  */
 
-
-
+enum Ol {}
+enum Ul {}
 
 /*
  
@@ -232,8 +269,9 @@ print(render(users(["Blob Jr.", "Blob", "Blob Sr."])))
  
  */
 
-
-
+protocol ContainsLi {}
+extension Ol: ContainsLi {}
+extension Ul: ContainsLi {}
 
 /*
  
@@ -243,6 +281,21 @@ print(render(users(["Blob Jr.", "Blob", "Blob Sr."])))
  
  */
 
+func ol2(attrs: [(String, String)] = [], _ children: [ChildOf<Ol>]) -> Node {
+    return .el("ol", attrs, children.map { $0.node })
+}
 
+func ul2(attrs: [(String, String)] = [], _ children: [ChildOf<Ul>]) -> Node {
+    return .el("ul", attrs, children.map { $0.node })
+}
+
+func li2<T>(attrs: [(String, String)] = [], _ children: [Node]) -> ChildOf<T> where T: ContainsLi {
+    return ChildOf<T>(node: .el("li", attrs, children))
+}
+
+print(render(ol2([li2(["one"]), li2(["two"]), li2(["three"])])))
+print(render(ul2([li2(["one"]), li2(["two"]), li2(["three"])])))
+
+// I think it's the solution
 
 //: [Next](@next)
