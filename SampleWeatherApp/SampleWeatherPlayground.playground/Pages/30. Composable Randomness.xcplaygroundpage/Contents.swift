@@ -215,7 +215,23 @@ evens.run()
  
  */
 
+let characterGen = frequency([
+        (1, int(in: 0...55295)),
+        (1, int(in: 57344...1114111))
+    ])
+    .map { $0! }
+    .map { Unicode.Scalar($0) }
+    .filter { $0 != nil }
+    .map { $0! }
+    .map { String(Character($0)) }
+    .array(count: int(in: 0...10))
+    .map { $0.joined() }
 
+characterGen.run()
+characterGen.run()
+characterGen.run()
+
+// it's composed out of int generators
 
 /*
 
@@ -225,7 +241,26 @@ evens.run()
  
  */
 
+//func element<A>(of xs: [A]) -> Gen<A?> {
+//    return int(in: 0...(xs.count - 1)).map { index in
+//        guard !xs.isEmpty else { return nil }
+//        return xs[index]
+//    }
+//}
 
+func element<C: Collection>(of: C) -> Gen<C.Element?> {
+    return int(in: 0...(of.count - 2))
+        .map { of.dropFirst($0).first }
+}
+
+let elementUpa = element(of: ["dupa" : 1, "zupa" : 2, "pupa" : 3])
+elementUpa.run()
+elementUpa.run()
+
+// it cannot be redefined in terms of sequence because
+// the sequences doesn't need to be finite. and if the sequence is
+// not finite, you canot get the arbitrary element with
+// the known probability. probability is approaching zero
 
 /*
 
@@ -235,7 +270,41 @@ evens.run()
  
  */
 
+func subsequence<A>(of array: [A]) -> Gen<[A]> {
+    return Gen<[A]> {
+        if array.isEmpty { return array }
+        let size = int(in: 0...(array.count - 1)).run()
+        let offset = int(in: 0...(array.count - 1 - size)).run()
+        let slice = array[offset...(size + offset)]
+        return Array(slice)
+    }
+}
 
+let someInts = subsequence(of: [1, 2, 3, 4, 5, 6, 7, 8])
+someInts.run()
+someInts.run()
+someInts.run()
+someInts.run()
+someInts.run()
+someInts.run()
+someInts.run()
+
+func subsequence<C: Collection>(of collection: C) -> Gen<C.SubSequence> {
+    return Gen<C.SubSequence> {
+        if collection.isEmpty { return collection.prefix(0) }
+        let size = int(in: 0...(collection.count - 1)).run()
+        print("size \(size)")
+        let offset = int(in: 0...(collection.count - 1 - size)).run()
+        print("offset \(offset)")
+        return collection.dropFirst(offset).prefix(size)
+    }
+}
+
+let subsequenceUpa = subsequence(of: ["dupa" : 1, "zupa" : 2, "pupa" : 3])
+print(Array(subsequenceUpa.run()))
+print(Array(subsequenceUpa.run()))
+print(Array(subsequenceUpa.run()))
+print(Array(subsequenceUpa.run()))
 
 /*
 
@@ -247,7 +316,11 @@ evens.run()
  
  */
 
+func zip2<A, B>(_ ga: Gen<A>, _ gb: Gen<B>) -> Gen<(A, B)> {
+    return Gen<(A, B)> { return (ga.run(), gb.run()) }
+}
 
+zip2(int(in: 0...10), int(in: 100...200)).run()
 
 /*
 
@@ -259,7 +332,13 @@ evens.run()
  
  */
 
+func zip2<A, B, C>(with f: @escaping (A, B) -> C) -> (Gen<A>, Gen<B>) -> Gen<C> {
+    return { ga, gb in
+        return Gen<C> { return f(ga.run(), gb.run()) }
+    }
+}
 
+zip2(with: +)(int(in: 0...10), int(in: 100...200)).run()
 
 /*
 
@@ -269,7 +348,22 @@ evens.run()
  
  */
 
+func zip3<A, B, C>(_ ga: Gen<A>, _ gb: Gen<B>, _ gc: Gen<C>) -> Gen<(A, B, C)> {
+    return Gen<(A, B, C)> { return (ga.run(), gb.run(), gc.run()) }
+}
 
+zip3(int(in: 0...10), int(in: 100...200), int(in: 1000...2000)).run()
 
+func zip3<A, B, C, D>(with f: @escaping (A, B, C) -> D)
+    -> (Gen<A>, Gen<B>, Gen<C>) -> Gen<D> {
+    return { ga, gb, gc in
+        return Gen<D> { return f(ga.run(), gb.run(), gc.run()) }
+    }
+}
+
+zip3(with: { $0 + $1 + $2 })(
+        int(in: 0...10), int(in: 100...200), int(in: 1000...2000)
+    )
+    .run()
 
 //: [Next](@next)
