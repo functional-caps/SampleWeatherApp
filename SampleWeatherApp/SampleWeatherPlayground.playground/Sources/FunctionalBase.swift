@@ -490,3 +490,21 @@ public extension NonEmpty where C: SetAlgebra {
 }
 
 public typealias NonEmptySet<A> = NonEmpty<Set<A>> where A: Hashable
+
+public struct Gen<A> {
+    public let run: () -> A
+}
+
+extension Gen {
+    public func map<B>(_ f: @escaping (A) -> B) -> Gen<B> {
+        return Gen<B> { f(self.run()) }
+    }
+}
+
+extension Gen {
+    public func array(count: Gen<Int>) -> Gen<[A]> {
+        return Gen<[A]> {
+            Array(repeating: (), count: count.run()).map(self.run)
+        }
+    }
+}

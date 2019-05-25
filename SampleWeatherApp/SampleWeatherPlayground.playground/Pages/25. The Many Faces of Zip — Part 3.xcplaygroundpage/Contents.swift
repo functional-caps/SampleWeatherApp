@@ -404,26 +404,26 @@ func alt<A, E>(_ first: Validated<A, E>, _ second: Validated<A, E>) -> Validated
 
 // alt: (F<A>, F<A>) -> F<A> for Parallel
 
-func alt<A>(_ first: Parallel<A>, _ second: Parallel<A>) -> Parallel<A> {
+func alt<A>(_ p1: Parallel<A>, _ p2: Parallel<A>) -> Parallel<A> {
     return Parallel { callback in
 
         let dispatchSemaphore = DispatchSemaphore(value: 0)
 
-        var a: A?
-        var b: B?
-        pa.run {
-            a = $0
+        var a1: A?
+        var a2: A?
+        p1.run {
+            a1 = $0
             dispatchSemaphore.signal()
         }
-        pb.run {
-            b = $0
+        p2.run {
+            a2 = $0
             dispatchSemaphore.signal()
         }
         dispatchSemaphore.wait()
-        if let a = a {
-            callback(a)
-        } else if let b = b {
-            callback(b)
+        if let a1 = a1 {
+            callback(a1)
+        } else if let a2 = a2 {
+            callback(a2)
         }
     }
 }
