@@ -493,6 +493,7 @@ public typealias NonEmptySet<A> = NonEmpty<Set<A>> where A: Hashable
 
 public struct Gen<A> {
     public let run: () -> A
+    public init(run: @escaping () -> A) { self.run = run }
 }
 
 extension Gen {
@@ -506,5 +507,16 @@ extension Gen {
         return Gen<[A]> {
             Array(repeating: (), count: count.run()).map(self.run)
         }
+    }
+}
+
+public func int(in range: ClosedRange<Int>) -> Gen<Int> {
+    return .init { Int.random(in: range) } // this is alternative implementation
+}
+
+public func element<A>(of xs: [A]) -> Gen<A?> {
+    return int(in: 0...(xs.count - 1)).map { index in
+        guard !xs.isEmpty else { return nil }
+        return xs[index]
     }
 }

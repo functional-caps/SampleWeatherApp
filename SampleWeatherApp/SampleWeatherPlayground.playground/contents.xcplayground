@@ -33,5 +33,6 @@
         <page name='29. DSL vs Templating Language'/>
         <page name='30. Composable Randomness'/>
         <page name='31. Decodable Randomness — Part 1'/>
+        <page name='32. Decodable Randomness — Part 2'/>
     </pages>
 </playground>
