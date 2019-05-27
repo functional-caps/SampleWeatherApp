@@ -123,17 +123,25 @@ random2.run()
 
 struct Gen2<T>
 where T : FixedWidthInteger, T : UnsignedInteger {
-    let run: (RandomNumberGenerator) -> () -> T
+    let printSeed: String
+    let run: () -> T
+    init(rng: RandomNumberGenerator) {
+        var copyRNG = rng
+        printSeed = {
+            if let rng = rng as? LCG {
+                return "\(rng.seed)"
+            } else {
+                return "unknown"
+            }
+        }()
+        run = { copyRNG.next() }
+    }
+    
 }
 
-let random3 = Gen2<UInt64> { rng in
-    var copyRNG = rng
-    return { copyRNG.next() }
-}
+let random3 = Gen2<UInt64>(rng: SystemRandomNumberGenerator())
 
-let randomSysRNG = random3.run(SystemRandomNumberGenerator())
-
-randomSysRNG()
+random3.run()
 
 /*
  
@@ -144,6 +152,47 @@ randomSysRNG()
  You can look to Nate Cook’s playground, shared on the Swift forums, or (for bonus points), you can define your own linear congruential generator (or LCG).
  
  */
+
+struct LCG: RandomNumberGenerator {
+    
+    let seed: UInt64
+    
+    private var modulus: UInt64
+    private var multiplier: UInt64
+    private var increment: UInt64
+    private var value: UInt64
+    
+    init?(seed: UInt64, multiplier: UInt64, increment: UInt64, modulus: UInt64) {
+        guard modulus > 0,
+            multiplier > 0, multiplier < modulus,
+            increment >= 0, increment < modulus,
+            seed >= 0, seed < modulus
+        else { return nil }
+        self.seed = seed
+        value = seed
+        self.multiplier = multiplier
+        self.modulus = modulus
+        self.increment = increment
+    }
+    
+    mutating func next() -> UInt64 {
+        value = (multiplier * value + increment) % modulus
+        return value
+    }
+    
+}
+
+var lcg = LCG(seed: 100_000, multiplier: 123456, increment: 7654321, modulus: 123456789)!
+
+lcg.next()
+lcg.next()
+lcg.next()
+
+let random4 = Gen2<UInt64>(rng: LCG(seed: 100_000, multiplier: 123456, increment: 7654321, modulus: 123456789)!)
+
+random4.run()
+random4.run()
+random4.run()
 
 /*
  
@@ -156,6 +205,31 @@ randomSysRNG()
  
  */
 
+import XCTest
+
+let numberOfRuns = 100
+
+func forAll<A>(file: StaticString = #file, line: UInt = #line,
+               _ a: Gen2<A>, propertyShouldHold: (A) -> Bool) {
+    for i in 0...numberOfRuns {
+        let value = a.run()
+        guard propertyShouldHold(value) else {
+            XCTFail("failed, seed was \(a.printSeed), index was \(i), value was \(value), file was \(file), line was \(line)")
+            return
+        }
+        XCTAssert(true, "passed!")
+    }
+}
+
+class UserManagerTests: XCTestCase {
+    func testLoggingIn() {
+        forAll(Gen2<UInt64>(rng: LCG(seed: 100_000, multiplier: 123456, increment: 7654321, modulus: 123456789)!))
+        { $0 % 2 == 0 }
+    }
+}
+
+UserManagerTests.defaultTestSuite.run()
+
 /*
  
  Exercise 5.
@@ -165,7 +239,7 @@ randomSysRNG()
  */
 
  
- 
+ // done
  
 
 //: [Next](@next)
