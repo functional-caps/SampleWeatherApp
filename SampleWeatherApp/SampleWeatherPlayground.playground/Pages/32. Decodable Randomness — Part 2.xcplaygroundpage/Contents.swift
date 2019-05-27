@@ -121,6 +121,35 @@ random2.run()
  
  */
 
+struct LCG: RandomNumberGenerator {
+    
+    let seed: UInt64
+    
+    private var modulus: UInt64
+    private var multiplier: UInt64
+    private var increment: UInt64
+    private var value: UInt64
+    
+    init?(seed: UInt64, multiplier: UInt64, increment: UInt64, modulus: UInt64) {
+        guard modulus > 0,
+            multiplier > 0, multiplier < modulus,
+            increment >= 0, increment < modulus,
+            seed >= 0, seed < modulus
+            else { return nil }
+        self.seed = seed
+        value = seed
+        self.multiplier = multiplier
+        self.modulus = modulus
+        self.increment = increment
+    }
+    
+    mutating func next() -> UInt64 {
+        value = (multiplier * value + increment) % modulus
+        return value
+    }
+    
+}
+
 struct Gen2<T>
 where T : FixedWidthInteger, T : UnsignedInteger {
     let printSeed: String
@@ -152,35 +181,6 @@ random3.run()
  You can look to Nate Cook’s playground, shared on the Swift forums, or (for bonus points), you can define your own linear congruential generator (or LCG).
  
  */
-
-struct LCG: RandomNumberGenerator {
-    
-    let seed: UInt64
-    
-    private var modulus: UInt64
-    private var multiplier: UInt64
-    private var increment: UInt64
-    private var value: UInt64
-    
-    init?(seed: UInt64, multiplier: UInt64, increment: UInt64, modulus: UInt64) {
-        guard modulus > 0,
-            multiplier > 0, multiplier < modulus,
-            increment >= 0, increment < modulus,
-            seed >= 0, seed < modulus
-        else { return nil }
-        self.seed = seed
-        value = seed
-        self.multiplier = multiplier
-        self.modulus = modulus
-        self.increment = increment
-    }
-    
-    mutating func next() -> UInt64 {
-        value = (multiplier * value + increment) % modulus
-        return value
-    }
-    
-}
 
 var lcg = LCG(seed: 100_000, multiplier: 123456, increment: 7654321, modulus: 123456789)!
 
