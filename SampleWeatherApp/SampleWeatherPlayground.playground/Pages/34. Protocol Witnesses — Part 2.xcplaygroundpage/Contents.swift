@@ -304,7 +304,18 @@ testRepresenting.rawValue(.three)
  
  */
 
+struct Comparing<A> {
+    
+    let equating: Equating<A>
+    
+    let isLess: (A, A) -> Bool
+    let isLessOrEqual: (A, A) -> Bool
+    let isMoreOrEqual: (A, A) -> Bool
+    let isMore: (A, A) -> Bool
+    
+}
 
+// I think it translates to composition
 
 /*
  
@@ -314,7 +325,16 @@ testRepresenting.rawValue(.three)
  
  */
 
+let comparingInt = Comparing<Int>(
+    equating: equalInt, isLess: <, isLessOrEqual: <=, isMoreOrEqual: >=, isMore: >
+)
 
+comparingInt.equating.equal(1, 1)
+comparingInt.equating.equal(1, 3)
+comparingInt.isLess(1, 3)
+comparingInt.isLessOrEqual(1, 3)
+comparingInt.isMore(1, 3)
+comparingInt.isMoreOrEqual(1, 3)
 
 /*
  
@@ -324,7 +344,20 @@ testRepresenting.rawValue(.three)
  
  */
 
+protocol DefaultDescribable {
+    static var defaultWitness: Describing<Self> { get }
+}
 
+func print<A: DefaultDescribable>(tag: String, _ value: A) {
+    print(tag: tag, value, A.defaultWitness)
+}
 
+extension Int: DefaultDescribable {
+    static var defaultWitness: Describing<Int> {
+        return Describing<Int> { "int it is: \($0)" }
+    }
+}
+
+print(tag: "prod", 42)
 
 //: [Next](@next)
