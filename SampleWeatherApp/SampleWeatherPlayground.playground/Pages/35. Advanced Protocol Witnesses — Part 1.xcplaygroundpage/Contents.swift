@@ -214,7 +214,7 @@ let nestedStringArrays = (Equating.array >>> Equating.array)(stringCount)
  
  */
 
-
+// this is the same exercise as in episode #34
 
 /*
  
@@ -224,7 +224,7 @@ let nestedStringArrays = (Equating.array >>> Equating.array)(stringCount)
  
  */
 
-
+// this is the same exercise as in episode #34
 
 /*
  
@@ -234,7 +234,7 @@ let nestedStringArrays = (Equating.array >>> Equating.array)(stringCount)
  
  */
 
-
+// this is the same exercise as in episode #34
 
 /*
  
@@ -244,7 +244,7 @@ let nestedStringArrays = (Equating.array >>> Equating.array)(stringCount)
  
  */
 
-
+// this is the same exercise as in episode #34
 
 /*
  
@@ -254,7 +254,7 @@ let nestedStringArrays = (Equating.array >>> Equating.array)(stringCount)
  
  */
 
-
+// this is the same exercise as in episode #34
 
 /*
  
@@ -264,6 +264,6 @@ let nestedStringArrays = (Equating.array >>> Equating.array)(stringCount)
  
  */
 
-
+// this is the same exercise as in episode #34
 
 //: [Next](@next)
