@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <playground version='6.0' target-platform='ios'>
     <pages>
-        <page name='LiveView'/>
+        <page name='Live View'/>
         <page name='1. Functions'/>
         <page name='2. Side Effects'/>
         <page name='3. UIKit Styling with Functions'/>
         <page name='4. Algebraic Data Types — Algebra'/>
-        <page name='5. HigherOrderFunction'/>
+        <page name='5. Higher Order Function'/>
         <page name='6. Functional Setters'/>
         <page name='7. Setters and Key Paths'/>
         <page name='8. Getters and Key Paths'/>
@@ -37,6 +37,7 @@
         <page name='33. Protocol Witnesses — Part 1'/>
         <page name='34. Protocol Witnesses — Part 2'/>
         <page name='35. Advanced Protocol Witnesses — Part 1'/>
-        <page name='35. Advanced Protocol Witnesses — Part 2'/>
+        <page name='36. Advanced Protocol Witnesses — Part 2'/>
+        <page name='37. Protocol-Oriented Library Design — Part 1'/>
     </pages>
 </playground>

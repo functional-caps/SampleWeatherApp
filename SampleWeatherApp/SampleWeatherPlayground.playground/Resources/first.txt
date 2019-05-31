@@ -1,0 +1,3 @@
+func asd {
+    return "dsa"
+}
