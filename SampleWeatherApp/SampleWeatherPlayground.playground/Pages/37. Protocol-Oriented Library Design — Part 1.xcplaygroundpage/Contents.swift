@@ -106,7 +106,7 @@ typealias IndexedLine = (Int, String.SubSequence)
 enum Diff {
     
     private static func toIndexedLines(_ string: String) -> [IndexedLine] {
-        let lines = string.split(separator: "\n")
+        let lines = string.split(separator: "\n", maxSplits: .max, omittingEmptySubsequences: false)
         var linesWithIndices: [IndexedLine] = []
         for (index, line) in lines.enumerated() {
             linesWithIndices.append((index, line))
@@ -249,6 +249,8 @@ enum Diff {
         let firstLines = toIndexedLines(first)
         let secondLines = toIndexedLines(second)
         
+        print(firstLines)
+        
         let (prefix, suffix, restFirst, restSecond) =
             identifyMatchingPrefixAndSuffix(firstLines: firstLines, secondLines: secondLines)
         
@@ -291,10 +293,38 @@ enum Diff {
         
         let lcs = LCS(sequenceToLCS)
         
+        let filteredPaired = sortedPaired.filter { lcs.contains($0.0.0) }
+        
+        print(filteredPaired)
+        
+//        let lcsedPaired = sortedPaired.sorted {
+//            let indexFirst = $0.0.0
+//            let indexSecond = $1.0.0
+//            if let index1 = lcs.firstIndex(of: indexFirst),
+//                let index2 = lcs.firstIndex(of: indexSecond) {
+//                return index1 < index2
+//            } else if lcs.contains(indexSecond) {
+//                return true
+//            }
+//            return false
+//        }
+        
 //        let lcs = LCS([9, 4, 6, 12, 8, 7, 1, 5, 10, 11, 3, 2, 13])
         
         print(lcs)
+//        print(lcsedPaired)
         
+        var index = 0
+        for line in prefix {
+            print("= \(line.1.1)")
+            index = line.1.0
+        }
+        
+//        print(index + 1)
+        
+        for line in suffix {
+            print("= \(line.1.1)")
+        }
         
         // Step 4 from https://bramcohen.livejournal.com/73318.html
         
