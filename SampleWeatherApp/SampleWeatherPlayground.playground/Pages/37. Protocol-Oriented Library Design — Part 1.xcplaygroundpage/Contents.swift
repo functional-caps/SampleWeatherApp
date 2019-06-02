@@ -101,11 +101,24 @@ extension Snapshotable {
  
  */
 
+typealias IndexedLine = (Int, String.SubSequence)
+
 enum Diff {
-    static func diff(first: String, second: String) -> String? {
-        let firstLines = first.split(separator: "\n")
-        let secondLines = first.split(separator: "\n")
-        
+    
+    private static func toIndexedLines(_ string: String) -> [IndexedLine] {
+        let lines = string.split(separator: "\n")
+        var linesWithIndices: [IndexedLine] = []
+        for (index, line) in lines.enumerated() {
+            linesWithIndices.append((index, line))
+        }
+        return linesWithIndices
+    }
+    
+    // This is step 1. and 2. from https://bramcohen.livejournal.com/73318.html
+    private static func identifyMatchingPrefixAndSuffix(
+        firstLines: [IndexedLine], secondLines: [IndexedLine]
+    ) -> (prefix: [(IndexedLine, IndexedLine)], suffix: [(IndexedLine, IndexedLine)],
+          restFirst: [IndexedLine], restSecond: [IndexedLine]) {
         // Step 1 from https://bramcohen.livejournal.com/73318.html
         let commonLinesStart = zip(firstLines, secondLines)
             .prefix { firstLine, secondLine -> Bool in firstLine == secondLine }
@@ -114,17 +127,179 @@ enum Diff {
         let restSecondStart = secondLines[commonLinesStart.count...]
         
         // Step 2 from https://bramcohen.livejournal.com/73318.html
-        let commonLinesEnd = zip(firstLines.reversed(), secondLines.reversed())
+        let commonLinesEnd = zip(restFirstStart.reversed(),
+                                 restSecondStart.reversed())
             .prefix { firstLine, secondLine -> Bool in firstLine == secondLine }
+        
+        let restFirst = Array(restFirstStart.reversed()[commonLinesStart.count...].reversed())
+        let restSecond = Array(restSecondStart.reversed()[commonLinesStart.count...].reversed())
+
+        return (prefix: commonLinesStart, suffix: commonLinesEnd,
+                restFirst: restFirst, restSecond: restSecond)
+    }
+    
+    private static func findUnique<T>(_ lines: [T], comparator: (T, T) -> Bool)
+        -> (unique: [T], rest: [T]) {
+            var unique: [T] = []
+            var rest: [T] = []
+            for line in lines {
+                if let index = unique.firstIndex(where: { comparator($0, line) }) {
+                    let previousLine = unique.remove(at: index)
+                    rest.append(previousLine)
+                    rest.append(line)
+                    } else if rest.contains(where: { comparator($0, line) }) {
+                    rest.append(line)
+                } else {
+                    unique.append(line)
+                }
+            }
+            return (unique: unique, rest: rest)
+    }
+    
+    private static func findCrossUniqueLines(
+        _ uniqueFromFirst: [IndexedLine], _ second: [IndexedLine]
+    ) -> (unique: [IndexedLine], rest: [IndexedLine]) {
+        var unique: [IndexedLine] = []
+        var rest: [IndexedLine] = []
+        for line in uniqueFromFirst {
+            if second.contains(where: { $0.1 == line.1 }) {
+                if let index = unique.firstIndex(where: { $0.1 == line.1 }) {
+                    unique.remove(at: index)
+                }
+                rest.append(line)
+            } else {
+                unique.append(line)
+            }
+        }
+        return (unique: unique, rest: rest)
+    }
+    
+    private static func matchBothSides(
+        _ first: [IndexedLine], _ second: [IndexedLine]
+    ) -> (firstUnique: [IndexedLine], secondUnique: [IndexedLine],
+          doublePaired: [(IndexedLine, IndexedLine)]) {
+            var firstUnique: [IndexedLine] = []
+            var secondUnique: [IndexedLine] = []
+            var doublePaired: [(IndexedLine, IndexedLine)] = []
+            for line in first {
+                if let secondLine = second.first(where: { $0.1 == line.1 }) {
+                    doublePaired.append((line, secondLine))
+                } else {
+                    firstUnique.append(line)
+                }
+            }
+            for line in second {
+                if let firstLine = first.first(where: { $0.1 == line.1 }) {
+                    continue //doublePaired.append((firstLine, line))
+                } else {
+                    secondUnique.append(line)
+                }
+            }
+            doublePaired
+            return (firstUnique: firstUnique, secondUnique: secondUnique, doublePaired: doublePaired)
+    }
+    
+    private static func LCS(_ values: [Int]) -> [Int] {
+        
+        struct Entry {
+            let value: Int
+            let backtrack: [Entry?]
+        }
+        
+        typealias Stack = [Entry]
+        var stacks: [Stack] = []
+        
+        for value in values {
+            var inserted = false
+            for (index, var stack) in stacks.enumerated() {
+                if let first = stack.first, first.value > value {
+                    var backtrack: [Entry?] = []
+                    if index != 0 {
+                        backtrack = [stacks[index - 1].first]
+                    }
+                    stack.insert(Entry(value: value, backtrack: backtrack), at: 0)
+                    stacks[index] = stack
+                    inserted = true
+                    break
+                }
+            }
+            if !inserted {
+                stacks.append([Entry(value: value, backtrack: [stacks.last?.first])])
+            }
+        }
+        
+        let toPrint = stacks.map { $0.map { $0.value } }
+        
+        print(toPrint)
+        
+        var entry: Entry? = stacks.last?.first
+        var result: [Int] = []
+        while let current = entry {
+            result.append(current.value)
+            entry = current.backtrack.first?.flatMap { $0 }
+        }
+        
+        result.reverse()
+        
+        return result
+    }
+    
+    static func diff(first: String, second: String) -> String? {
+        
+        let firstLines = toIndexedLines(first)
+        let secondLines = toIndexedLines(second)
+        
+        let (prefix, suffix, restFirst, restSecond) =
+            identifyMatchingPrefixAndSuffix(firstLines: firstLines, secondLines: secondLines)
         
         // Step 3 from https://bramcohen.livejournal.com/73318.html
         
+        //// Find all lines which occur exactly once on both sides
+        
+        let (potentiallyUniqueFirst, potentiallyDuplicateFirst) = findUnique(restFirst, comparator: { $0.1 == $1.1 })
+        let (potentiallyUniqueSecond, potentiallyDuplicateSecond) = findUnique(restSecond, comparator: { $0.1 == $1.1 })
+        
+        //// now potentiallyUnique are lines that are only once on particular side
+        
+        let (uniqueFirst, actuallyDuplicateFirst) =
+            findCrossUniqueLines(potentiallyUniqueFirst, potentiallyDuplicateSecond)
+        let (uniqueSecond, actuallyDuplicateSecond) =
+            findCrossUniqueLines(potentiallyUniqueSecond, potentiallyDuplicateFirst)
+        
+        //// match unique
+        
+        let duplicateFirst = potentiallyDuplicateFirst + actuallyDuplicateFirst
+        let duplicateSecond = potentiallyDuplicateSecond + actuallyDuplicateSecond
+        
+        let (firstUnique, secondUnique, doublePaired) = matchBothSides(uniqueFirst, uniqueSecond)
+        
+        let sortedPaired =  doublePaired.sorted { firstPair, secondPair -> Bool in
+            firstPair.1.0 < secondPair.1.0
+        }
+        
+        
+        let sequenceToLCS = sortedPaired.map { $0.0.0 }
+
+//        print(firstUnique)
+//        print(duplicateFirst)
+//        print(secondUnique)
+//        print(duplicateSecond)
+//        print(sortedPaired)
+//        print(sequenceToLCS)
+
+        //// do longest common subsequence on those lines, matching them up
+        
+        let lcs = LCS(sequenceToLCS)
+        
+//        let lcs = LCS([9, 4, 6, 12, 8, 7, 1, 5, 10, 11, 3, 2, 13])
+        
+        print(lcs)
         
         
         // Step 4 from https://bramcohen.livejournal.com/73318.html
         
-        let restFirst = restFirstStart.reversed()[commonLinesEnd.count...].reversed()
-        let restSecond = restSecondStart.reversed()[commonLinesEnd.count...].reversed()
+//        let restFirst = restFirstStart.reversed()[commonLinesEnd.count...].reversed()
+//        let restSecond = restSecondStart.reversed()[commonLinesEnd.count...].reversed()
         
         
         
