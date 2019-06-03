@@ -129,7 +129,7 @@ enum Diff {
         // Step 2 from https://bramcohen.livejournal.com/73318.html
         let commonLinesEnd = zip(restFirstStart.reversed(),
                                  restSecondStart.reversed())
-            .prefix { firstLine, secondLine -> Bool in firstLine == secondLine }
+            .prefix { firstLine, secondLine -> Bool in firstLine.1 == secondLine.1 }
         
         let restFirst = Array(restFirstStart.reversed()[commonLinesStart.count...].reversed())
         let restSecond = Array(restSecondStart.reversed()[commonLinesStart.count...].reversed())
@@ -189,8 +189,8 @@ enum Diff {
                 }
             }
             for line in second {
-                if let firstLine = first.first(where: { $0.1 == line.1 }) {
-                    continue //doublePaired.append((firstLine, line))
+                if first.contains(where: { $0.1 == line.1 }) {
+                    continue
                 } else {
                     secondUnique.append(line)
                 }
@@ -228,10 +228,6 @@ enum Diff {
             }
         }
         
-        let toPrint = stacks.map { $0.map { $0.value } }
-        
-        print(toPrint)
-        
         var entry: Entry? = stacks.last?.first
         var result: [Int] = []
         while let current = entry {
@@ -249,10 +245,10 @@ enum Diff {
         let firstLines = toIndexedLines(first)
         let secondLines = toIndexedLines(second)
         
-        print(firstLines)
-        
         let (prefix, suffix, restFirst, restSecond) =
             identifyMatchingPrefixAndSuffix(firstLines: firstLines, secondLines: secondLines)
+        
+        var matched = prefix + suffix
         
         // Step 3 from https://bramcohen.livejournal.com/73318.html
         
@@ -263,75 +259,69 @@ enum Diff {
         
         //// now potentiallyUnique are lines that are only once on particular side
         
-        let (uniqueFirst, actuallyDuplicateFirst) =
+        let (uniqueFirst, _) =
             findCrossUniqueLines(potentiallyUniqueFirst, potentiallyDuplicateSecond)
-        let (uniqueSecond, actuallyDuplicateSecond) =
+        let (uniqueSecond, _) =
             findCrossUniqueLines(potentiallyUniqueSecond, potentiallyDuplicateFirst)
         
-        //// match unique
-        
-        let duplicateFirst = potentiallyDuplicateFirst + actuallyDuplicateFirst
-        let duplicateSecond = potentiallyDuplicateSecond + actuallyDuplicateSecond
-        
-        let (firstUnique, secondUnique, doublePaired) = matchBothSides(uniqueFirst, uniqueSecond)
-        
-        let sortedPaired =  doublePaired.sorted { firstPair, secondPair -> Bool in
-            firstPair.1.0 < secondPair.1.0
-        }
-        
-        
-        let sequenceToLCS = sortedPaired.map { $0.0.0 }
-
-//        print(firstUnique)
-//        print(duplicateFirst)
-//        print(secondUnique)
-//        print(duplicateSecond)
-//        print(sortedPaired)
-//        print(sequenceToLCS)
+        let (_, _, doublePaired) = matchBothSides(uniqueFirst, uniqueSecond)
 
         //// do longest common subsequence on those lines, matching them up
         
-        let lcs = LCS(sequenceToLCS)
+        let lcs = LCS(doublePaired.sorted { $0.1.0 < $1.1.0 }.map { $0.0.0 })
         
-        let filteredPaired = sortedPaired.filter { lcs.contains($0.0.0) }
+        matched += doublePaired.filter { lcs.contains($0.0.0) }
+            .sorted { $0.1.0 < $1.1.0 }
         
-        print(filteredPaired)
-        
-//        let lcsedPaired = sortedPaired.sorted {
-//            let indexFirst = $0.0.0
-//            let indexSecond = $1.0.0
-//            if let index1 = lcs.firstIndex(of: indexFirst),
-//                let index2 = lcs.firstIndex(of: indexSecond) {
-//                return index1 < index2
-//            } else if lcs.contains(indexSecond) {
-//                return true
-//            }
-//            return false
-//        }
-        
-//        let lcs = LCS([9, 4, 6, 12, 8, 7, 1, 5, 10, 11, 3, 2, 13])
-        
-        print(lcs)
-//        print(lcsedPaired)
-        
-        var index = 0
-        for line in prefix {
-            print("= \(line.1.1)")
-            index = line.1.0
-        }
-        
-//        print(index + 1)
-        
-        for line in suffix {
-            print("= \(line.1.1)")
-        }
+        matched.sort { $0.1.0 < $1.1.0 }
         
         // Step 4 from https://bramcohen.livejournal.com/73318.html
         
-//        let restFirst = restFirstStart.reversed()[commonLinesEnd.count...].reversed()
-//        let restSecond = restSecondStart.reversed()[commonLinesEnd.count...].reversed()
+        let firstSections = firstLines.split(
+            maxSplits: .max, omittingEmptySubsequences: false
+        ) { line in
+            matched.contains(where: { line == $0.0 })
+        }
+
+        let secondSections = secondLines.split(
+            maxSplits: .max, omittingEmptySubsequences: false
+        ) { line in
+            matched.contains(where: { line == $0.1 })
+        }
+
+        let sectionsInBetween = zip(firstSections, secondSections).dropFirst()
+
+        sectionsInBetween.forEach { firstLines, secondLines in
+            let (prefix, suffix, _, _) =
+                identifyMatchingPrefixAndSuffix(firstLines: Array(firstLines), secondLines: Array(secondLines))
+            let matchedAgain = prefix + suffix
+            print(matchedAgain)
+            matched += matchedAgain
+        }
         
+        matched.sort { $0.1.0 < $1.1.0 }
         
+        let firstSections2 = firstLines.split(
+            maxSplits: .max, omittingEmptySubsequences: false
+        ) { line in
+            matched.contains(where: { line == $0.0 })
+        }
+        
+        let secondSections2 = secondLines.split(
+            maxSplits: .max, omittingEmptySubsequences: false
+        ) { line in
+            matched.contains(where: { line == $0.1 })
+        }
+        
+        let sectionsInBetween2 = zip(firstSections2, secondSections2).dropFirst()
+        
+        matched.forEach { print("\($0.0.0) -> \($0.1.0), \($0.0.1)") }
+
+        zip(matched, sectionsInBetween2).forEach { match, section in
+            print("  \(match.1.1)")
+            section.0.forEach { print("- \($0.1)") }
+            section.1.forEach { print("+ \($0.1)") }
+        }
         
         return nil
     }
@@ -342,8 +332,6 @@ let secondFilePath = Bundle.main.path(forResource: "second", ofType: "txt")!
 let firstString = try! String(contentsOf: URL(fileURLWithPath: firstFilePath))
 let secondString = try! String(contentsOf: URL(fileURLWithPath: secondFilePath))
 
-print(firstString)
-print(secondString)
 print(String(describing: Diff.diff(first: firstString, second: secondString)))
 
 //: [Next](@next)
