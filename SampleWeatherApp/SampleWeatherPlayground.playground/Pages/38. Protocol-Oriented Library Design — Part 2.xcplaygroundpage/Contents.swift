@@ -116,7 +116,11 @@ print(view.snapshot)
  
  */
 
-
+struct Diffing<A> {
+    let diff: (A, A) -> (String, [XCTAttachment])?
+    let from: (Data) -> A
+    let data: (A) -> Data
+}
 
 /*
 
@@ -124,10 +128,24 @@ print(view.snapshot)
 
  Translate the Snapshottable protocol into a Snapshotting struct. How do you capture the associated type constraint?
  
- 
  */
 
+struct Snapshotting<Snapshot: Diffable, A> {
+    let snapshot: (A) -> Snapshot
+    let pathExtension: String
+    
+    init(snapshot: @escaping (A) -> Snapshot, pathExtension: String = "png") {
+        self.snapshot = snapshot
+        self.pathExtension = pathExtension
+    }
+}
 
+extension Snapshotting where Snapshot == String {
+    init(snapshot: @escaping (A) -> Snapshot) {
+        self.snapshot = snapshot
+        self.pathExtension = "txt"
+    }
+}
 
 /*
  
@@ -140,7 +158,20 @@ print(view.snapshot)
  
  */
 
+let diffingString = Diffing(
+    diff: { old, new in
+        guard let difference = Diff.lines(old, new) else { return nil }
+        return ("Diff:\n\(difference)" , [XCTAttachment(string: difference)])
+    },
+    from: { String(decoding: $0, as: UTF8.self) },
+    data: { Data($0.utf8) }
+)
 
+let diffingUIImage = Diffing(
+    diff: { _,_ in nil }, // here comes the Diff helper that pointfree introduced
+    from: { UIImage(data: $0, scale: UIScreen.main.scale)! },
+    data: { $0.pngData()! }
+)
 
 /*
  
@@ -148,10 +179,9 @@ print(view.snapshot)
  
  Translate the Snapshottable protocol into a Snapshotting struct. How do you capture the associated type constraint?
  
- 
  */
 
-
+// same as exercise 4.
 
 /*
  
@@ -165,10 +195,34 @@ print(view.snapshot)
  UIView
  UIViewController
  
- 
  */
 
+let snapshottingString = Snapshotting(snapshot: { $0 })
 
+let snapshottingUIImage = Snapshotting(snapshot: { $0 })
+
+let snapshottingCALayer = Snapshotting(snapshot: { (layer: CALayer) in
+    UIGraphicsImageRenderer(size: layer.bounds.size)
+        .image { ctx in layer.render(in: ctx.cgContext) }
+})
+
+let snapshottingUIViewImage = Snapshotting(snapshot: { (view: UIView) in
+    snapshottingCALayer.snapshot(view.layer)
+})
+
+let snapshottingUIViewText = Snapshotting(snapshot: { (view: UIView) in
+    (view.perform(Selector(("recursiveDescription")))?
+        .takeUnretainedValue() as! String)
+        .replacingOccurrences(of: "0x............", with: "", options: [.regularExpression], range: nil) // strip adresses
+})
+
+let snapshottingUIViewControllerImage = Snapshotting(snapshot: { (vc: UIViewController) in
+    return snapshottingUIViewImage.snapshot(vc.view)
+})
+
+let snapshottingUIViewControllerText = Snapshotting { (vc: UIViewController) in
+    snapshottingUIViewText.snapshot(vc.view)
+}
 
 /*
  
