@@ -130,7 +130,7 @@ struct Diffing<A> {
  
  */
 
-struct Snapshotting<Snapshot: Diffable, A> {
+struct Snapshotting<A, Snapshot> {
     let snapshot: (A) -> Snapshot
     let pathExtension: String
     
@@ -141,7 +141,7 @@ struct Snapshotting<Snapshot: Diffable, A> {
 }
 
 extension Snapshotting where Snapshot == String {
-    init(snapshot: @escaping (A) -> Snapshot) {
+    init(snapshot: @escaping (A) -> String) {
         self.snapshot = snapshot
         self.pathExtension = "txt"
     }
@@ -197,11 +197,12 @@ let diffingUIImage = Diffing(
  
  */
 
+//let snapshottingString = Snapshotting(snapshot: { $0 })
 let snapshottingString = Snapshotting(snapshot: { $0 })
 
 let snapshottingUIImage = Snapshotting(snapshot: { $0 })
 
-let snapshottingCALayer = Snapshotting(snapshot: { (layer: CALayer) in
+let snapshottingCALayer = Snapshotting(snapshot: { (layer: CALayer) -> UIImage in
     UIGraphicsImageRenderer(size: layer.bounds.size)
         .image { ctx in layer.render(in: ctx.cgContext) }
 })
@@ -232,7 +233,50 @@ let snapshottingUIViewControllerText = Snapshotting { (vc: UIViewController) in
  
  */
 
+func snapshotDirectoryUrl(file: StaticString) -> URL {
+    let fileUrl = URL(fileURLWithPath: "\(file)")
+    let directoryUrl = fileUrl
+        .deletingLastPathComponent()
+        .appendingPathComponent("__Snapshots__")
+        .appendingPathComponent(fileUrl.deletingPathExtension().lastPathComponent)
+    try! FileManager.default.createDirectory(at: directoryUrl, withIntermediateDirectories: true)
+    return directoryUrl
+}
 
+func snapshotUrl(file: StaticString, function: String) -> URL {
+    return snapshotDirectoryUrl(file: file)
+        .appendingPathComponent(String(function.dropLast(2)))
+}
+
+class SnapshotTestCase: XCTestCase {
+    var record = false
+
+func assertSnapshot<V, S>(
+    matching value: V,
+    snapshotting: Snapshotting<V, S>,
+    diffing: Diffing<S>,
+    file: StaticString = #file,
+    function: String = #function,
+    line: UInt = #line) {
+    
+    let snapshot = snapshotting.snapshot(value)
+    let referenceUrl = snapshotUrl(file: file, function: function)
+        .appendingPathExtension(snapshotting.pathExtension)
+    
+    if !self.record, let referenceData = try? Data(contentsOf: referenceUrl) {
+        let reference = diffing.from(referenceData)
+        guard let (failure, attachments) = diffing.diff(reference, snapshot) else { return }
+        XCTFail(failure, file: file, line: line)
+        XCTContext.runActivity(named: "Attached failure diff") { activity in
+            attachments
+                .forEach { image in activity.add(image) }
+        }
+    } else {
+        try! diffing.data(snapshot).write(to: referenceUrl)
+        XCTFail("Recorded: …\n\"\(referenceUrl.path)\"", file: file, line: line)
+    }
+}
+}
 
 
 //: [Next](@next)
