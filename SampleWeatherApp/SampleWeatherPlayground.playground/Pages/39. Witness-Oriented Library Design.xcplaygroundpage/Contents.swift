@@ -158,6 +158,156 @@ extension Snapshotting {
     }
 }
 
-// Gone up to 28:34 - multiple witnesses
+extension Snapshotting where A == UIView, Snapshot == String {
+    
+    static let recursiveDescription: Snapshotting =
+        Snapshotting<String, String>.lines.pullback { view in
+            view.setNeedsLayout()
+            view.layoutIfNeeded()
+            return (view.perform(Selector(("recursiveDescription")))?
+                .takeUnretainedValue() as! String)
+                .replacingOccurrences(of: "0x............", with: "", options: [.regularExpression], range: nil) // strip adresses
+
+    }
+    
+//    static let recursiveDescription = Snapshotting(
+//        diffing: .lines,
+//        pathExtension: "txt",
+//        snapshot: { view in
+//            view.setNeedsLayout()
+//            view.layoutIfNeeded()
+//            return (view.perform(Selector(("recursiveDescription")))?
+//                .takeUnretainedValue() as! String)
+//                .replacingOccurrences(of: "0x............", with: "", options: [.regularExpression], range: nil) // strip adresses
+//            }
+//    )
+}
+
+extension Snapshotting where A == UIViewController, Snapshot == String {
+    static let recursiveDescription: Snapshotting =
+        Snapshotting<UIView, String>.recursiveDescription.pullback { $0.view }
+}
+
+/*
+ 
+ Exercises
+ Take our witness-oriented library and define some interesting strategies! Think about your own code base and specialized Snapshotting (and Diffing) instances you can define. Here are some suggestions to get you started!
+ 
+ Define a dump strategy on Snapshotting<Any, String> that uses the output of Swift’s dump function. You can reuse logic from the recursiveDescription strategy to remove occurrences of memory addresses.
+ 
+ */
+
+struct StringLogger: TextOutputStream {
+    
+    private(set) var content: String = ""
+    
+    mutating func write(_ string: String) {
+        content.append(contentsOf: string)
+    }
+    
+}
+
+extension Snapshotting where A == Any, Snapshot == String {
+    static let dumping: Snapshotting = Snapshotting<Any, String>(
+        diffing: .lines,
+        pathExtension: "txt",
+        snapshot: { object in
+            var tos = StringLogger()
+            dump(object, to: &tos)
+            return tos.content
+        }
+    )
+}
+
+print(Snapshotting.dumping.snapshot(Snapshotting.dumping))
+
+/*
+ 
+ Define a Snapshotting<URLRequest, String> strategy that snapshots a raw HTTP request, pretty-printing the method, headers, and body of the request.
+ 
+ */
+
+extension Snapshotting where A == URLRequest, Snapshot == String {
+    
+    static let http: Snapshotting = Snapshotting<URLRequest, String>(
+        diffing: .lines,
+        pathExtension: "txt",
+        snapshot: { (request: URLRequest) in
+            let method = request.httpMethod ?? "unknown"
+            let headers = request.allHTTPHeaderFields?
+                .map { "\($0.0) : \($0.1)" }
+                .joined(separator: "\n") ?? "-"
+            let body = request.httpBody
+                .flatMap { String(data: $0, encoding: .utf8) } ?? "-"
+            return """
+Method:
+    \(method)
+Headers:
+    \(headers)
+Body:
+    \(body)
+"""
+        }
+    )
+}
+
+let url = URL(string: "http://example.com")!
+print(Snapshotting.http.snapshot(URLRequest(url: url)))
+
+/*
+ 
+ Define a Snapshotting<NSAttributedString, UIImage> strategy that snapshots images of attributed strings.
+ 
+ */
+
+extension Snapshotting
+where A == NSAttributedString, Snapshot == UIImage {
+    
+    static let image: Snapshotting = Snapshotting<UIView, UIImage>.image
+        .pullback { string in
+        let label = UILabel()
+        label.attributedText = string
+        label.sizeToFit()
+        return label
+    }
+}
+
+let string = NSAttributedString(
+    string: "hello world",
+    attributes: [NSAttributedString.Key.foregroundColor : UIColor.red]
+)
+
+Snapshotting<NSAttributedString, UIImage>.image.snapshot(string)
+
+/*
+ 
+ Define a Snapshotting<NSAttributedString, String> strategy that snapshots HTML representations of attributed strings.
+ 
+ */
+
+extension Snapshotting
+where A == NSAttributedString, Snapshot == String {
+    
+    static let html: Snapshotting =
+        Snapshotting<NSAttributedString, String>(
+        diffing: .lines,
+        pathExtension: "txt",
+        snapshot: { string in
+            let data = try! string.data(
+                from: NSRange(location: 0, length: string2.length),
+                documentAttributes: [.documentType : NSAttributedString.DocumentType.html]
+                )
+            return String(data: data, encoding: .utf8)!
+        }
+    )
+}
+
+let string2 = NSAttributedString(
+    string: "hello world",
+    attributes: [NSAttributedString.Key.foregroundColor : UIColor.red]
+)
+
+print(Snapshotting<NSAttributedString, String>.html.snapshot(string))
+
 
 //: [Next](@next)
