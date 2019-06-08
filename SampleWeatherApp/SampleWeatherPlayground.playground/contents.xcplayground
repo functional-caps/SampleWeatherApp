@@ -41,5 +41,6 @@
         <page name='37. Protocol-Oriented Library Design — Part 1'/>
         <page name='38. Protocol-Oriented Library Design — Part 2'/>
         <page name='39. Witness-Oriented Library Design'/>
+        <page name='40. Async Functional Refactoring'/>
     </pages>
 </playground>
