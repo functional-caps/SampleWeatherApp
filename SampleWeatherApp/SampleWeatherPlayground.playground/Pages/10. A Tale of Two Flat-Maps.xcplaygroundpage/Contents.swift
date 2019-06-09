@@ -207,7 +207,7 @@ extension Either {
                 return .right(self)
             }
         }
-        return either
+        return result
     }
 
     func partitionMap<C, D>(

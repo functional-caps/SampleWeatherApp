@@ -124,7 +124,7 @@ struct UserWithAge {
 
  */
 
-extension Tagged: Numeric where RawValue: Numeric, RawValue: Comparable {
+extension Tagged: AdditiveArithmetic where RawValue: Numeric, RawValue: Comparable {
 
     public typealias Magnitude = RawValue.Magnitude
 

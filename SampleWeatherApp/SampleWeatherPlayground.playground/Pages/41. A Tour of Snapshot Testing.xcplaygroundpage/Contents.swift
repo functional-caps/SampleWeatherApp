@@ -129,45 +129,21 @@ extension Snapshotting where A == CALayer, Snapshot == UIImage {
         UIGraphicsImageRenderer(size: layer.bounds.size)
             .image { ctx in layer.render(in: ctx.cgContext) }
     }
-    
-    //    static let image: Snapshotting<CALayer, UIImage> = Snapshotting(
-    //        diffing: .image,
-    //        pathExtension: "png",
-    //        snapshot: { layer in
-    //            UIGraphicsImageRenderer(size: layer.bounds.size)
-    //                .image { ctx in layer.render(in: ctx.cgContext) }
-    //        }
-    //    )
-    
 }
+
 extension Snapshotting where A == UIView, Snapshot == UIImage {
     
     static let image: Snapshotting =
         Snapshotting<CALayer, UIImage>.image.pullback { view in
             view.layer
     }
-    
-    //    static let image: Snapshotting<UIView, UIImage> = Snapshotting(
-    //        diffing: .image,
-    //        pathExtension: "png",
-    //        snapshot: { view in
-    //            Snapshotting<CALayer, UIImage>.image.snapshot(view.layer)
-    //        }
-    //    )
 }
 
 extension Snapshotting where A == UIViewController, Snapshot == UIImage {
     
     static let image: Snapshotting<UIViewController, UIImage> =
         Snapshotting<UIView, UIImage>.image.pullback { vc in vc.view }
-    
-    //    static let image: Snapshotting<UIViewController, UIImage> = Snapshotting(
-    //        diffing: .image,
-    //        pathExtension: "png",
-    //        snapshot: { vc in
-    //            Snapshotting<UIView, UIImage>.image.snapshot(vc.view)
-    //        }
-    //    )
+
 }
 
 extension Snapshotting {
@@ -194,7 +170,7 @@ extension Snapshotting {
                         }
                     }
                 }
-            }
+        }
         )
     }
 }
@@ -217,135 +193,72 @@ extension Snapshotting where A == UIViewController, Snapshot == String {
         Snapshotting<UIView, String>.recursiveDescription.pullback { $0.view }
 }
 
+
 // HERE EPISODE STARTS
 
-import WebKit
-
-class NavigationDelegate: NSObject, WKNavigationDelegate {
-    
-    var callback: (() -> Void)?
-    
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        self.callback!()
-    }
+extension Snapshotting
+where A == NSAttributedString, Snapshot == UIImage {
+    static let image: Snapshotting = Snapshotting<UIView, UIImage>.image
+        .pullback { string in
+            let label = UILabel()
+            label.attributedText = string
+            label.numberOfLines = 0
+            label.backgroundColor = .white
+            label.frame.size = label.systemLayoutSizeFitting(
+                CGSize(width: 300, height: 0),
+                withHorizontalFittingPriority: .defaultHigh,
+                verticalFittingPriority: .defaultLow
+            )
+            return label
+        }
 }
 
-//let webView = WKWebView(frame: .zero)
-//let delegate = NavigationDelegate.init {
-//    let view = webView.snapshotView(afterScreenUpdates: true)!
-//    let image = Snapshotting<UIView, UIImage>.image.snapshot(view)
-//    print(image)
-//}
-//
-//webView.navigationDelegate = delegate
+let string = NSAttributedString(
+    string: "elo", attributes: [.foregroundColor : UIColor.green]
+)
 
-//extension Snapshotting where A == WKWebView, Snapshot == UIImage {
-//    static let image: Snapshotting = Snapshotting<UIImage, UIImage>
-//        .image.pullback { webView in
-//            let sema = DispatchSemaphore(value: 0)
-//            var webViewImage: UIImage!
-//            let delegate = NavigationDelegate {
-//                let view = webView.snapshotView(afterScreenUpdates: true)!
-//                webViewImage = Snapshotting<UIView, UIImage>.image.snapshot(view)
-//                sema.signal()
-//            }
-//            webView.navigationDelegate = delegate
-//            sema.wait()
-//            return webViewImage
-//        }
-//}
-
-extension Snapshotting where A == WKWebView, Snapshot == UIImage {
-//    static let image: Snapshotting = Snapshotting<WKWebView, UIImage>(
-//        diffing: .image, pathExtension: "png"
-//    ) { webView -> Parallel<UIImage> in
-//        return Parallel<UIImage> { callback in
-//            let delegate = NavigationDelegate()
-//            delegate.callback = {
-//                let view = webView.snapshotView(afterScreenUpdates: true)!
-//                let image = UIGraphicsImageRenderer(size: view.layer.bounds.size)
-//                    .image { ctx in view.layer.render(in: ctx.cgContext) }
-//                callback(image)
-//                _ = delegate
-//            }
-//            webView.navigationDelegate = delegate
-//        }
-//    }
-    
-    static let image: Snapshotting = Snapshotting<UIImage, UIImage>.image.asyncPullback { webView -> Parallel<UIImage> in
-        return Parallel<UIImage> { callback in
-            let delegate = NavigationDelegate()
-            delegate.callback = {
-                let view = webView.snapshotView(afterScreenUpdates: true)!
-                let image = UIGraphicsImageRenderer(size: view.layer.bounds.size)
-                    .image { ctx in view.layer.render(in: ctx.cgContext) }
-                callback(image)
-                _ = delegate
-            }
-            webView.navigationDelegate = delegate
-        }
-    }
+Snapshotting.image.snapshot(string).run {
+    _ = $0
+    print($0)
 }
 
 /*
+
+ Exercise 1.
  
- Exercises
- 
- Redefine pullback on Snapshotting in terms of asyncPullback.
+ Write an .html strategy for snapshotting NSAttributedString. You will want to use the data(from:documentAttributes:) method on NSAttributedString with the NSAttributedString.DocumentType.html attribute to convert any attribtued string into an HTML document.
  
  */
 
-extension Snapshotting {
-    func pullback2<A0>(_ f: @escaping (A0) -> A)
-        -> Snapshotting<A0, Snapshot> {
-            return self.asyncPullback { (a0) -> Parallel<A> in
-                let a = f(a0)
-                return Parallel<A> { callback in
-                    callback(a)
-                }
-            }
-    }
-}
 
-let vcSnap = Snapshotting<UIView, String>.recursiveDescription.pullback2 {
-    (a0: UIViewController) -> UIView in
-    return a0.view
-}
 
-let vc = UIViewController()
+ /*
+ 
+ Exercise 2.
+ 
+ Integrate the snapshot testing library into one of your projects, and write a snapshot test.
+ 
+ */
 
-vcSnap.snapshot(vc).run { print("Elo! \($0)") }
 
 /*
  
- While we were introduced to pullback by doing a deep dive on contravariance, asyncPullback seems to have a different shape.
+ Exercise 3.
  
- Extract the snapshot logic of asyncPullback to a more general function on Parallel. What is the shape of this function? Is it familiar? What other types from past episodes have a similar operation?
+ Create a custom, domain-specific snapshot strategy for one of your types.
  
  */
 
-extension Parallel {
-    func flatMap<B>(_ f: @escaping (A) -> Parallel<B>) -> Parallel<B> {
-        return Parallel<B> { callback in
-            self.run { a in
-                let parallelB = f(a)
-                parallelB.run { b in callback(b) }
-            }
-        }
-    }
-}
 
-extension Snapshotting {
-    
-    func asyncPullback2<A0>(_ f: @escaping (A0) -> Parallel<A>) -> Snapshotting<A0, Snapshot> {
-        return Snapshotting<A0, Snapshot>(
-            diffing: diffing,
-            pathExtension: pathExtension,
-            snapshot: { a0 in return f(a0).flatMap(self.snapshot) }
-        )
-    }
-}
+/*
+ 
+ Exercise 4.
+ 
+ Send us a pull request to add a snapshot strategy for a Swift standard library or cocoa data type that we haven’t yet implemented.
+ 
+ */
 
-// It's flatMap!
+
+
 
 //: [Next](@next)
