@@ -230,7 +230,30 @@ Snapshotting.image.snapshot(string).run {
  
  */
 
+extension Snapshotting
+where A == NSAttributedString, Snapshot == String {
+    
+    static let html: Snapshotting = Snapshotting<String, String>.lines
+        .pullback { (attributedString: NSAttributedString) in
+            let data = try! attributedString.data(
+                from: NSRange(location: 0, length: attributedString.length),
+                documentAttributes: [.documentType : NSAttributedString.DocumentType.html]
+            )
+            return String(data: data, encoding: .utf8)!
 
+        }
+}
+
+let string2 = NSAttributedString(
+    string: "hello world",
+    attributes: [NSAttributedString.Key.foregroundColor : UIColor.red]
+)
+
+Snapshotting<NSAttributedString, String>.html.snapshot(string)
+    .run { print($0) }
+
+Snapshotting<NSAttributedString, String>.html.snapshot(string2)
+    .run { print($0) }
 
  /*
  
@@ -240,6 +263,7 @@ Snapshotting.image.snapshot(string).run {
  
  */
 
+// cannot do it here :(
 
 /*
  
@@ -249,6 +273,117 @@ Snapshotting.image.snapshot(string).run {
  
  */
 
+enum TryTypeSpecificError : Error {
+    case derivedFromNil
+    case unexpectedElementInTry
+    case unexpectedErrorInTry
+    case computationUndefinedInTry
+    case unexpectedErrorType(originalErrorType: Error.Type)
+}
+
+enum TryTyped<Element, ErrorParam : Error> {
+    
+    case some(Element)
+    case error(ErrorParam)
+    
+    public static func orThrow(_ closure: () throws -> Element) throws -> TryTyped {
+        return try TryTyped(throwing: closure)
+    }
+    
+    public static func orThrow(_ closure: @autoclosure () throws -> Element) throws -> TryTyped {
+        return try TryTyped(throwing: closure)
+    }
+    
+    public init?(_ closure: @autoclosure () throws -> Element) {
+        do {
+            self = try TryTyped(throwing: closure)
+        } catch {
+            return nil
+        }
+    }
+    
+    private init(throwing: () throws -> Element) throws {
+        do {
+            let result = try throwing()
+            self = TryTyped(elem: result)
+        } catch let error as ErrorParam {
+            self = TryTyped(error: error)
+        } catch {
+            throw TryTypeSpecificError.unexpectedErrorType(originalErrorType: type(of: error))
+        }
+    }
+    
+    init(elem: Element) {
+        self = .some(elem)
+    }
+    
+    init(error: ErrorParam) {
+        self = .error(error)
+    }
+    
+    public var asPossibleError: ErrorParam? {
+        get {
+            return try? self.errorOrThrow()
+        }
+    }
+    
+    public func errorOrThrow() throws -> ErrorParam {
+        guard case .error(let error) = self else { throw TryTypeSpecificError.unexpectedElementInTry }
+        return error
+    }
+    
+    func elementOrThrow() throws -> Element {
+        guard case .some(let elem) = self else { throw TryTypeSpecificError.unexpectedErrorInTry }
+        return elem
+    }
+    
+    var asPossibleElement: Element? {
+        return try? self.elementOrThrow()
+    }
+}
+
+struct StringLogger: TextOutputStream {
+    
+    private(set) var content: String = ""
+    
+    mutating func write(_ string: String) {
+        content.append(contentsOf: string)
+    }
+}
+
+extension Snapshotting where A == Any, Snapshot == String {
+    static let dumping: Snapshotting = Snapshotting<String, String>.lines
+        .pullback { object in
+            var tos = StringLogger()
+            dump(object, to: &tos)
+            return tos.content
+        }
+}
+
+
+extension Snapshotting {
+    
+    static func dumpingStrategy<T, E: Error>() -> Snapshotting<TryTyped<T, E>, String> {
+        return Snapshotting<Any, String>.dumping
+            .pullback { (a: TryTyped<T, E>) -> Any in
+                switch a {
+                case .some(let elem): return elem
+                case .error(let error): return error
+                }
+            }
+    }
+}
+
+enum RandomError: Error { case random }
+
+let try1 = TryTyped<Int, RandomError>(elem: 42)
+let try2 = TryTyped<Int, RandomError>.init(error: .random)
+
+let strategy: Snapshotting<TryTyped<Int, RandomError>, String> = Snapshotting<TryTyped<Int, RandomError>, String>.dumpingStrategy()
+
+strategy.snapshot(try1).run { print($0) }
+
+strategy.snapshot(try2).run { print($0) }
 
 /*
  
@@ -258,7 +393,43 @@ Snapshotting.image.snapshot(string).run {
  
  */
 
+import CoreBluetooth
 
+let central = CBCentralManager(delegate: nil, queue: nil)
 
+extension CBManagerState {
+    var description: String {
+        switch self {
+        case .unknown: return "unknown"
+        case .resetting: return "resetting"
+        case .unsupported: return "unsupported"
+        case .unauthorized: return "unauthorized"
+        case .poweredOff: return "poweredOff"
+        case .poweredOn: return "poweredOn"
+        @unknown default: return "some new state that we do not know of"
+        }
+    }
+}
+
+extension Snapshotting where A == CBCentralManager, Snapshot == String {
+    
+    static let recursiveDescription: Snapshotting =
+        Snapshotting<String, String>.lines
+            .pullback { (manager: CBCentralManager) in
+                let delegate = central.delegate
+                    .map { "instance of \(type(of: $0))" } ?? "nil"
+                return """
+                CBCentralManager:
+                - delegate: \(delegate)
+                - isScanning: \(central.isScanning)
+                - state: \(central.state.description)
+                """
+            }
+}
+
+Snapshotting<CBCentralManager, String>.recursiveDescription
+    .snapshot(central).run { print($0) }
+
+// now it's time to make it pull request!
 
 //: [Next](@next)

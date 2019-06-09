@@ -294,7 +294,7 @@ where A == NSAttributedString, Snapshot == String {
         pathExtension: "txt",
         snapshot: { string in
             let data = try! string.data(
-                from: NSRange(location: 0, length: string2.length),
+                from: NSRange(location: 0, length: string.length),
                 documentAttributes: [.documentType : NSAttributedString.DocumentType.html]
                 )
             return String(data: data, encoding: .utf8)!
