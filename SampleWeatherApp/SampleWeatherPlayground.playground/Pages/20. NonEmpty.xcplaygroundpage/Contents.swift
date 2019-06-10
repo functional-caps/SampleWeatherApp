@@ -133,11 +133,9 @@ extension NonEmpty {
             var copyTail = tail
             let chosenValue = f(head.value, value)
             copyTail.removeValue(forKey: head.key)
-            self.head = (key: head.key, value: chosenValue)
-            self.tail = copyTail
+            self.init((key: head.key, value: chosenValue), copyTail)
         } else {
-            self.head = head
-            self.tail = tail
+            self.init(head, tail)
         }
 
     }

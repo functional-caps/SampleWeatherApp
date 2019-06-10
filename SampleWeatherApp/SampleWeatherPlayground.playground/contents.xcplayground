@@ -43,5 +43,6 @@
         <page name='39. Witness-Oriented Library Design'/>
         <page name='40. Async Functional Refactoring'/>
         <page name='41. A Tour of Snapshot Testing'/>
+        <page name='42. The Many Faces of Flat-Map — Part 1'/>
     </pages>
 </playground>
