@@ -12,22 +12,12 @@ extension Array {
     }
 }
 
-[1, 2, 3]
-    .flatMap { Array(repeating: $0, count: $0) }
-
 extension Optional {
     func flatMap<NewWrapped>(_ f: (Wrapped) -> NewWrapped?) -> NewWrapped? {
         guard let wrapped = self else { return nil }
         return f(wrapped)
     }
 }
-
-let maybe42: String? = "42"
-
-type(of:
-    maybe42
-        .flatMap { string in Int(string) }
-)
 
 enum Result<A, E> {
 
