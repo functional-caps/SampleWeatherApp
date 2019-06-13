@@ -510,12 +510,44 @@ extension Gen {
     }
 }
 
-public func int(in range: ClosedRange<Int>) -> Gen<Int> {
-    return .init { Int.random(in: range) } // this is alternative implementation
+import Darwin
+
+let random = Gen(run: arc4random)
+
+let uniform = random.map { Double($0) / Double(UInt32.max) }
+
+func double(in range: ClosedRange<Double>) -> Gen<Double> {
+    return uniform.map { t in
+        t * (range.upperBound - range.lowerBound) + range.lowerBound
+    }
 }
 
-public func element<A>(of xs: [A]) -> Gen<A?> {
-    return int(in: 0...(xs.count - 1)).map { index in
+let uint64: Gen<UInt64> = .init {
+    let lower = UInt64(random.run())
+    let upper = UInt64(random.run()) << 32
+    return upper + lower
+}
+
+public func intPublic(in range: ClosedRange<Int>) -> Gen<Int> {
+    return Gen<Int> {
+        var delta = UInt64(truncatingIfNeeded: range.upperBound &- range.lowerBound)
+        if delta == UInt64.max {
+            return Int(truncatingIfNeeded: uint64.run())
+        }
+        delta += 1
+        let tmp = UInt64.max % delta + 1
+        let upperBound = tmp == delta ? 0 : tmp
+        var random: UInt64 = 0
+        repeat {
+            random = uint64.run()
+        } while random < upperBound
+        return Int(truncatingIfNeeded: UInt64(truncatingIfNeeded: range.lowerBound))
+            &+ Int(random % delta)
+    }
+}
+
+public func elementPublic<A>(of xs: [A]) -> Gen<A?> {
+    return intPublic(in: 0...(xs.count - 1)).map { index in
         guard !xs.isEmpty else { return nil }
         return xs[index]
     }
