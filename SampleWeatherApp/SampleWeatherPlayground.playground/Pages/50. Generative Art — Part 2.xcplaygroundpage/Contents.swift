@@ -177,7 +177,7 @@ let curve = zip4(with: bump(amplitude:center:plateauSize:curveSize:))(
 
 func path(
     from min: CGFloat, to max: CGFloat, baseline: CGFloat
-) -> Gen<CGPath> {
+    ) -> Gen<CGPath> {
     let dx = mainArea.width / CGFloat(numSegments)
     return Gen<CGPath> { rng in
         
@@ -186,7 +186,7 @@ func path(
         let path = CGMutablePath()
         path.move(to: CGPoint(x: min, y: baseline))
         stride(from: min, to: max, by: dx).forEach { x in
-        
+            
             let y = bump(x)
             
             path.addLine(to: CGPoint(x: x, y: baseline + y))
@@ -208,7 +208,7 @@ let paths: Gen<[CGPath]> = collect(
            by: mainArea.height / CGFloat(numLines))
         .map { y in
             path(from: mainArea.minX, to: mainArea.maxX, baseline: y)
-        }
+    }
 )
 
 let image: Gen<UIImage> = paths.map { paths in
@@ -242,110 +242,6 @@ import PlaygroundSupport
 
 //PlaygroundPage.current.liveView = UIImageView(image: img)
 
-/*
- 
- Exercise 1.
- 
- Create a generator Gen<UIColor> of colors. Can this be expressed in terms of multiple Gen<CGFloat> generators?
- 
- */
 
-let colors: Gen<UIColor> = zip4(with: UIColor.init(red:green:blue:alpha:))(
-    Gen<CGFloat>.float(in: 0...1),
-    Gen<CGFloat>.float(in: 0...1),
-    Gen<CGFloat>.float(in: 0...1),
-    Gen<CGFloat>.float(in: 0...1)
-)
-
-colors.run(using: &lcrng)
-colors.run(using: &lcrng)
-colors.run(using: &lcrng)
-colors.run(using: &lcrng)
-
-/*
- 
- Exercise 2.
- 
- Create a generator Gen<CGPath> of random lines on a canvas. Can this be expressed in terms of multiple Gen<CGPoint> generators?
- 
- */
-
-func makePath(start: CGPoint, end: CGPoint) -> CGPath {
-    let path = CGMutablePath()
-    path.move(to: start)
-    path.addLine(to: end)
-    return path
-}
-
-let pointGen = zip(with: CGPoint.init(x:y:))(
-    Gen<CGFloat>.float(in: canvas.minX...canvas.maxX),
-    Gen<CGFloat>.float(in: canvas.minY...canvas.maxY)
-)
-
-let pathGen = zip(with: makePath(start:end:))(pointGen, pointGen)
-
-pathGen.run(using: &lcrng)
-pathGen.run(using: &lcrng)
-pathGen.run(using: &lcrng)
-
-/*
- 
- Exercise 3.
- 
- Create a generator Gen<UIImage> that draws a random number of randomly positioned straight lines on a canvas with random colors. Try to compose this generator out of lots of smaller generators.
- 
- */
-
-func draw(elems: [(CGPath, UIColor)]) -> UIImage {
-    return UIGraphicsImageRenderer(bounds: canvas).image { ctx in
-        let ctx = ctx.cgContext
-        ctx.setLineWidth(1.2)
-        elems.forEach {
-            ctx.setStrokeColor($0.1.cgColor)
-            ctx.addPath($0.0)
-            ctx.drawPath(using: .fillStroke)
-        }
-    }
-}
-
-let elemGen = zip(pathGen, colors)
-let elemsGen = elemGen.array(of: Gen<Int>.int(in: 1...50))
-let imageGen = elemsGen.map(draw(elems:))
-
-//PlaygroundPage.current.liveView = UIImageView(image: imageGen.run(using: &lcrng))
-
-/*
- 
- Exercise 4.
- 
- Change the bump function we created in this episode so that it adds a bit of random noise to the curve. To do this you will want to change the signature so that it returns a function (CGFloat) -> Gen<CGFloat> instead of just a simple function (CGFloat) -> CGFloat. This will allow you to introduce random perturbations into the y-coordinate of the graph.
- 
- */
-
-func bumpNoise(
-    amplitude: CGFloat,
-    center: CGFloat,
-    plateauSize: CGFloat,
-    curveSize: CGFloat
-) -> (CGFloat) -> Gen<CGFloat> {
-    return { x -> Gen<CGFloat> in
-        return Gen<CGFloat> { rng in
-            let plateauSize = plateauSize / 2
-            let curveSize = curveSize / 2
-            let size = plateauSize + curveSize
-            let x = x - center
-            let value = amplitude * (1 - g(
-                (x * x - plateauSize * plateauSize) / (size * size - plateauSize * plateauSize)
-                ))
-            let noiseAmplitude = amplitude / 20
-            let noise = Gen<CGFloat>.float(in: -noiseAmplitude...noiseAmplitude)
-            return value + noise.run(using: &rng)
-        }
-    }
-}
-
-PlaygroundPage.current.liveView = UIImageView(image: graph({ x in
-    bumpNoise(amplitude: 0.5, center: 0.25, plateauSize: 0.25, curveSize: 2.5)(x).run(using: &lcrng)
-}))
 
 //: [Next](@next)
