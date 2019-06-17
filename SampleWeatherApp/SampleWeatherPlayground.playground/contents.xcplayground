@@ -52,5 +52,7 @@
         <page name='48. Predictable Randomness — Part 2'/>
         <page name='49. Generative Art — Part 1'/>
         <page name='50. Generative Art — Part 2'/>
+        <page name='51. Structs 🤝 Enums'/>
+        <page name='52. Enum Properties'/>
     </pages>
 </playground>
