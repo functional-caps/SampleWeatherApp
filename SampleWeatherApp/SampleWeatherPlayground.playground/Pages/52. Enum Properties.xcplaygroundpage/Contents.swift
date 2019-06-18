@@ -16,13 +16,25 @@ enum Validated<Valid, Invalid> {
     case invalid([Invalid])
     
     var valid: Valid? {
-        guard case let .valid(value) = self else { return nil }
-        return value
+        get {
+            guard case let .valid(value) = self else { return nil }
+            return value
+        }
+        set {
+            guard let newValue = newValue, case .valid = self else { return }
+            self = .valid(newValue)
+        }
     }
     
     var invalid: [Invalid]? {
-        guard case let .invalid(value) = self else { return nil }
-        return value
+        get {
+            guard case let .invalid(value) = self else { return nil }
+            return value
+        }
+        set {
+            guard let newValue = newValue, case .invalid = self else { return }
+            self = .invalid(newValue)
+        }
     }
 }
 
@@ -120,5 +132,27 @@ validatedUsers
 
 //validatedValues
 //    .compactMap(\.valid)
+
+/*
+ 
+ Exercise 1.
+ 
+ While we’ve defined the gets of our enum properties, we haven’t defined our sets. Redefine Validated’s valid and invalid properties to have a setter in addition to its getter.
+ 
+ */
+
+// added to Validated definition
+
+/*
+ 
+ Exercise 2.
+ 
+ Take the valid setter for a spin. Assign Validated<Int, String>.valid(1) to a variable and increment the number using the setter.
+ 
+ */
+
+var validNumber = Validated<Int, String>.valid(1)
+validNumber.valid? += 1
+validNumber
 
 //: [Next](@next)
