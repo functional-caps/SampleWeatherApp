@@ -7,7 +7,7 @@ let tree = try SyntaxTreeParser.parse(url)
 
 final class Visitor: SyntaxVisitor {
     override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
-        print("extension \(node.identifier) {")
+        print("extension \(node.identifier.withoutTrivia()) {")
         print("")
         return .visitChildren
     }
@@ -21,7 +21,10 @@ final class Visitor: SyntaxVisitor {
     
     override func visit(_ node: EnumCaseElementSyntax) -> SyntaxVisitorContinueKind {
         if let associatedValue = node.associatedValue {
-            print("  var \(node.identifier): \(associatedValue)? {")
+            let propertyType = associatedValue.parameterList.count == 1
+                ? "\(associatedValue.parameterList[0].type!)"
+                : "(\(associatedValue.parameterList))"
+            print("  var \(node.identifier): \(propertyType)? {")
             print("    guard case let .\(node.identifier)(value) = self else { return nil }")
             print("    return value")
         } else if let parent = node.parent?.parent?.parent?.parent?.parent?.parent as? EnumDeclSyntax {
@@ -29,6 +32,13 @@ final class Visitor: SyntaxVisitor {
             print("    guard case .\(node.identifier) = self else { return nil }")
             print("    return self")
         }
+        print("  }")
+        print("")
+        //    let capitalizedIdentifier = "\(node.identifier)".capitalized
+        let identifier = "\(node.identifier)"
+        let capitalizedIdentifier = "\(identifier.first!.uppercased())\(identifier.dropFirst())"
+        print("  var is\(capitalizedIdentifier): Bool {")
+        print("    return self.\(node.identifier) != nil")
         print("  }")
         print("")
         return .skipChildren
@@ -120,7 +130,60 @@ optionalValues
  
  */
 
+let url2 = Bundle.main.url(forResource: "Exercise2", withExtension: "swift")!
+let tree2 = try SyntaxTreeParser.parse(url2)
+let visitor2 = Visitor()
+tree2.walk(visitor2)
 
+enum Multiple<A, B, C> {
+    case zero
+    case one(A)
+    case two(B, A)
+    case three(C, A, B)
+}
+
+extension Multiple {
+    
+    var zero: Multiple? {
+        guard case .zero = self else { return nil }
+        return self
+    }
+    
+    var one: A? {
+        guard case let .one(value) = self else { return nil }
+        return value
+    }
+    
+    var two: (B, A)? {
+        guard case let .two(value) = self else { return nil }
+        return value
+    }
+    
+    var three: (C, A, B)? {
+        guard case let .three(value) = self else { return nil }
+        return value
+    }
+    
+}
+
+let multipleValues: [Multiple<Int, String, Float>] = [
+    .zero,
+    .one(1),
+    .two("1", 1),
+    .three(1.0, 1, "1")
+]
+
+multipleValues
+    .compactMap { $0.zero }
+
+multipleValues
+    .compactMap { $0.one }
+
+multipleValues
+    .compactMap { $0.two }
+
+multipleValues
+    .compactMap { $0.three }
 
 /*
  
@@ -136,7 +199,29 @@ optionalValues
  
  */
 
+let url3 = Bundle.main.url(forResource: "Exercise3", withExtension: "swift")!
+let tree3 = try SyntaxTreeParser.parse(url3)
+let visitor3 = Visitor()
+tree3.walk(visitor3)
 
+enum Node {
+    case el(tag: String, attributes: [String: String], children: [Node])
+    case text(String)
+}
+
+extension Node {
+    
+    var el: (tag: String, attributes: [String: String], children: [Node])? {
+        guard case let .el(value) = self else { return nil }
+        return value
+    }
+    
+    var text: String? {
+        guard case let .text(value) = self else { return nil }
+        return value
+    }
+    
+}
 
 /*
  
@@ -145,3 +230,27 @@ optionalValues
  After you add support for labeled enum cases, ensure that the code generator properly handles enum cases with a single, labeled value.
  
  */
+
+let url4 = Bundle.main.url(forResource: "Exercise4", withExtension: "swift")!
+let tree4 = try SyntaxTreeParser.parse(url4)
+let visitor4 = Visitor()
+tree4.walk(visitor4)
+
+enum Node2 {
+    case el(children: [Node])
+    case text(String)
+}
+
+extension Node2 {
+    
+    var el: [Node]? {
+        guard case let .el(value) = self else { return nil }
+        return value
+    }
+    
+    var text: String? {
+        guard case let .text(value) = self else { return nil }
+        return value
+    }
+    
+}

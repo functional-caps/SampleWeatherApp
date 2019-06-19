@@ -54,5 +54,7 @@
         <page name='50. Generative Art — Part 2'/>
         <page name='51. Structs 🤝 Enums'/>
         <page name='52. Enum Properties'/>
+        <page name='53. Swift Syntax Enum Properties'/>
+        <page name='54. Advanced Swift Syntax Enum Properties'/>
     </pages>
 </playground>
