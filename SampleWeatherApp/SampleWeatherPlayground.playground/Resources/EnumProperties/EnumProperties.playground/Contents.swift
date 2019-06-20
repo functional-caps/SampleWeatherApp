@@ -1,54 +1,6 @@
 import Cocoa
 import SwiftSyntax
-
-let url = Bundle.main.url(forResource: "Enums", withExtension: "swift")!
-
-let tree = try SyntaxTreeParser.parse(url)
-
-final class Visitor: SyntaxVisitor {
-    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
-        print("extension \(node.identifier.withoutTrivia()) {")
-        print("")
-        return .visitChildren
-    }
-    
-    override func visitPost(_ node: Syntax) {
-        if node is EnumDeclSyntax {
-            print("}")
-            print("")
-        }
-    }
-    
-    override func visit(_ node: EnumCaseElementSyntax) -> SyntaxVisitorContinueKind {
-        if let associatedValue = node.associatedValue {
-            let propertyType = associatedValue.parameterList.count == 1
-                ? "\(associatedValue.parameterList[0].type!)"
-                : "(\(associatedValue.parameterList))"
-            print("  var \(node.identifier): \(propertyType)? {")
-            print("    guard case let .\(node.identifier)(value) = self else { return nil }")
-            print("    return value")
-        } else if let parent = node.parent?.parent?.parent?.parent?.parent?.parent as? EnumDeclSyntax {
-            print("  var \(node.identifier): \(parent.identifier)? {")
-            print("    guard case .\(node.identifier) = self else { return nil }")
-            print("    return self")
-        }
-        print("  }")
-        print("")
-        //    let capitalizedIdentifier = "\(node.identifier)".capitalized
-        let identifier = "\(node.identifier)"
-        let capitalizedIdentifier = "\(identifier.first!.uppercased())\(identifier.dropFirst())"
-        print("  var is\(capitalizedIdentifier): Bool {")
-        print("    return self.\(node.identifier) != nil")
-        print("  }")
-        print("")
-        return .skipChildren
-    }
-}
-
-let visitor = Visitor()
-
-tree.walk(visitor)
-
+import EnumProperties
 
 enum Validated<Valid, Invalid> {
     case valid(Valid)
@@ -62,9 +14,17 @@ extension Validated {
         return value
     }
     
+    var isValid: Bool {
+        return self.valid != nil
+    }
+    
     var invalid: [Invalid]? {
         guard case let .invalid(value) = self else { return nil }
         return value
+    }
+    
+    var isInvalid: Bool {
+        return self.invalid != nil
     }
     
 }
@@ -95,17 +55,24 @@ enum Optional<A> {
     case some(A)
     case none
 }
-
 extension Optional {
     
-    var some: (A)? {
+    var some: A? {
         guard case let .some(value) = self else { return nil }
         return value
+    }
+    
+    var isSome: Bool {
+        return self.some != nil
     }
     
     var none: Optional? {
         guard case .none = self else { return nil }
         return self
+    }
+    
+    var isNone: Bool {
+        return self.none != nil
     }
     
 }
@@ -149,9 +116,17 @@ extension Multiple {
         return self
     }
     
+    var isZero: Bool {
+        return self.zero != nil
+    }
+    
     var one: A? {
         guard case let .one(value) = self else { return nil }
         return value
+    }
+    
+    var isOne: Bool {
+        return self.one != nil
     }
     
     var two: (B, A)? {
@@ -159,9 +134,17 @@ extension Multiple {
         return value
     }
     
+    var isTwo: Bool {
+        return self.two != nil
+    }
+    
     var three: (C, A, B)? {
         guard case let .three(value) = self else { return nil }
         return value
+    }
+    
+    var isThree: Bool {
+        return self.three != nil
     }
     
 }
@@ -216,9 +199,17 @@ extension Node {
         return value
     }
     
+    var isEl: Bool {
+        return self.el != nil
+    }
+    
     var text: String? {
         guard case let .text(value) = self else { return nil }
         return value
+    }
+    
+    var isText: Bool {
+        return self.text != nil
     }
     
 }
@@ -248,9 +239,18 @@ extension Node2 {
         return value
     }
     
+    var isEl: Bool {
+        return self.el != nil
+    }
+    
     var text: String? {
         guard case let .text(value) = self else { return nil }
         return value
     }
     
+    var isText: Bool {
+        return self.text != nil
+    }
+    
 }
+

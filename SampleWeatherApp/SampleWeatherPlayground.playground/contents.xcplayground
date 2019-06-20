@@ -56,5 +56,8 @@
         <page name='52. Enum Properties'/>
         <page name='53. Swift Syntax Enum Properties'/>
         <page name='54. Advanced Swift Syntax Enum Properties'/>
+        <page name='55. Swift Syntax Command Line Tool'/>
+        <page name='56. What Is a Parser? — Part 1'/>
+        <page name='57. What Is a Parser? — Part 2'/>
     </pages>
 </playground>
