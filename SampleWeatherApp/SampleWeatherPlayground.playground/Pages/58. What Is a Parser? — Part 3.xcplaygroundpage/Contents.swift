@@ -138,7 +138,71 @@ print(parseLatLong("40.6782° N, 73.9442° W"))
  
  */
 
+extension Parser where A == Int {
 
+    static var int: Parser = Parser { str in
+        let prefix = str.prefix(while: {
+            $0.isNumber || $0 == "-"
+        })
+        guard let int = Int(prefix) else { return nil }
+        str.removeFirst(prefix.count)
+        return int
+    }
+}
+
+extension Parser where A == Double {
+    
+    static var double: Parser = Parser { str in
+        let prefix = str.prefix(while: {
+            $0.isNumber || "-+.eExXnNaA()iIfFtTyY".contains($0)
+        })
+        guard let double = Double(prefix) else { return nil }
+        str.removeFirst(prefix.count)
+        return double
+    }
+}
+
+extension Parser where A == Void {
+
+    static func literal(_ string: String) -> Parser<Void> {
+        return Parser<Void> { str in
+            guard str.hasPrefix(string) else { return nil }
+            str.removeFirst(string.count)
+            return ()
+        }
+    }
+}
+
+extension Parser {
+
+    static func always<A>(_ a: A) -> Parser<A> {
+        return Parser<A> { _ in a }
+    }
+}
+
+extension Parser where A == Double {
+    
+    static var northSouth: Parser = Parser { str in
+        guard
+            let cardinal = str.first,
+            cardinal == "N" || cardinal == "S"
+            else { return nil }
+        str.removeFirst(1)
+        return cardinal == "N" ? 1 : -1
+    }
+}
+
+extension Parser where A == Double {
+    
+    static var eastWest: Parser = Parser { str in
+        guard
+            let cardinal = str.first,
+            cardinal == "E" || cardinal == "W"
+            else { return nil }
+        str.removeFirst(1)
+        return cardinal == "E" ? 1 : -1
+    }
+}
 
 /*
 
@@ -150,7 +214,84 @@ print(parseLatLong("40.6782° N, 73.9442° W"))
  
  */
 
+extension Parser {
+    func map<B>(_ f: @escaping (A) -> B) -> Parser<B> {
+        return Parser<B> { str in
+            guard let match = self.run(&str) else {
+                return nil
+            }
+            return f(match)
+        }
+    }
+}
 
+print(
+    Parser<Int>.int.map { "found: \($0)" }.run("a 42 asd")
+)
+
+// I have two ideas for zip. The one that applies parsing "serially" and the one that applies it "concurently"
+
+// First, serial one
+
+func zip<A, B, C>(
+    with f: @escaping (A, B) -> C
+) -> (Parser<A>, Parser<B>) -> Parser<C> {
+    return { parserA, parserB in
+        return Parser<C> { str in
+            var copyStr = str
+            guard let matchA = parserA.run(&copyStr) else { return nil }
+            guard let matchB = parserB.run(&copyStr) else { return nil }
+            str = copyStr
+            return f(matchA, matchB)
+        }
+    }
+}
+
+let zippedParser = zip(with: { (int: Int, double: Double) -> String in
+    "int: \(int), double: \(double)"
+})(Parser<Int>.int, Parser<Double>.double)
+
+zippedParser.run("4242.01 asd")
+
+// Second, concurrent one
+
+func zipC<A, B, C>(
+    with f: @escaping (A, B) -> C
+    ) -> (Parser<A>, Parser<B>) -> Parser<C> {
+    return { parserA, parserB in
+        return Parser<C> { str in
+            var copyStrA = str
+            var copyStrB = str
+            guard let matchA = parserA.run(&copyStrA) else { return nil }
+            guard let matchB = parserB.run(&copyStrB) else { return nil }
+            str = copyStrA.count <= copyStrB.count ? copyStrA : copyStrB
+            return f(matchA, matchB)
+        }
+    }
+}
+
+let zippedCParser = zipC(with: { (int: Int, double: Double) -> String in
+    "int: \(int), double: \(double)"
+})(Parser<Int>.int, Parser<Double>.double)
+
+zippedCParser.run("4242.01 asd")
+
+// which one is the one?
+
+extension Parser {
+    
+    func flatMap<B>(_ f: @escaping (A) -> Parser<B>) -> Parser<B> {
+        return Parser<B> { str in
+            guard let match = self.run(&str) else { return nil }
+            let parserB = f(match)
+            return parserB.run(&str)
+        }
+    }
+}
+
+Parser.literal("asd")
+    .flatMap { Parser.literal("asd") }
+    .run("asdasdasd")
 
 /*
 
@@ -160,7 +301,16 @@ print(parseLatLong("40.6782° N, 73.9442° W"))
  
  */
 
+extension Parser where A == Void {
+    
+    static var end: Parser = Parser { str in
+        guard str.isEmpty else { return nil }
+        return ()
+    }
+}
 
+Parser.end.run("ads")
+Parser.end.run("")
 
 /*
 
@@ -170,7 +320,21 @@ print(parseLatLong("40.6782° N, 73.9442° W"))
  
  */
 
+extension Parser where A == Substring {
+    static func pred(_ f: @escaping (Character) -> Bool) -> Parser<Substring> {
+        return Parser<Substring> { str in
+            let satisfying = str.prefix(while: f)
+            guard !satisfying.isEmpty else { return nil }
+            str.removeFirst(satisfying.count)
+            return satisfying
+        }
+    }
+}
 
+print(
+    Parser<Substring>.pred({ $0.isNumber })
+        .run("123asd12")
+)
 
 /*
 
@@ -180,7 +344,15 @@ print(parseLatLong("40.6782° N, 73.9442° W"))
  
  */
 
+func nonConsuming<A>(from: Parser<A>) -> Parser<A> {
+    return Parser<A> { str in
+        var copyStr = str
+        return from.run(&copyStr)
+    }
+}
 
+nonConsuming(from: Parser<Int>.int)
+    .run("123")
 
 /*
 
@@ -190,6 +362,20 @@ print(parseLatLong("40.6782° N, 73.9442° W"))
  
  */
 
+func many<A>(from: Parser<A>) -> Parser<[A]> {
+    return Parser<[A]> { str in
+        var results = [A]()
+        while let match = from.run(&str) {
+            results.append(match)
+        }
+        guard !results.isEmpty else { return nil }
+        return results
+    }
+}
+
+many(from: Parser.literal("asd"))
+    .run("asdasdasdasd")
+    .match?.count
 
 
 /*
@@ -200,7 +386,19 @@ print(parseLatLong("40.6782° N, 73.9442° W"))
  
  */
 
+func choice<A>(_ parsers: Parser<A>...) -> Parser<A> {
+    return Parser<A> { str in
+        var result: A? = nil
+        _ = parsers.first { parser -> Bool in
+            result = parser.run(&str)
+            return result != nil
+        }
+        return result
+    }
+}
 
+choice(Parser.literal("asd"), Parser.literal("dsa"), Parser.literal("dsad"))
+    .run("dsada")
 
 /*
 
