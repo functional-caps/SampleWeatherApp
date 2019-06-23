@@ -9,33 +9,36 @@ struct Coordinate {
     let longitude: Double
 }
 
-struct Parser<A> {
+struct Parser<I, A> {
     //    let run: (String) -> A?
     //    let run: (String) -> (match: A?, rest: String)
-    let run: (inout Substring) -> A?
-    func run(_ str: String) -> (match: A?, rest: Substring) {
+    let run: (inout I) -> Result<A, String>
+}
+
+extension Parser where I == Substring {
+    func run(_ str: String) -> (match: Result<A, String>, rest: Substring) {
         var str = str[...]
         let match = self.run(&str)
         return (match, str)
     }
 }
 
-let int = Parser<Int> { str in
+let int = Parser<Substring, Int> { str in
     let prefix = str.prefix(while: {
         $0.isNumber || $0 == "-"
     })
-    guard let int = Int(prefix) else { return nil }
+    guard let int = Int(prefix) else { return .failure("Int.init niled") }
     str.removeFirst(prefix.count)
-    return int
+    return .success(int)
 }
 
-let double = Parser<Double> { str in
+let double = Parser<Substring, Double> { str in
     let prefix = str.prefix(while: {
         $0.isNumber || "-+.eExXnNaA()iIfFtTyY".contains($0)
     })
-    guard let double = Double(prefix) else { return nil }
+    guard let double = Double(prefix) else { return .failure("Double.init niled") }
     str.removeFirst(prefix.count)
-    return double
+    return .success(double)
 }
 
 double.run("1.2")
@@ -43,11 +46,11 @@ double.run("-1.2")
 double.run("-1.222e-12")
 double.run("inf")
 
-func literal(_ string: String) -> Parser<Void> {
-    return Parser<Void> { str in
-        guard str.hasPrefix(string) else { return nil }
+func literal(_ string: String) -> Parser<Substring, Void> {
+    return Parser<Substring, Void> { str in
+        guard str.hasPrefix(string) else { return .failure("No prefix found") }
         str.removeFirst(string.count)
-        return ()
+        return .success(())
     }
 }
 
@@ -55,54 +58,54 @@ literal("a").run("ab")
 literal("a").run("ba")
 literal("a").run("aaba")
 
-func always<A>(_ a: A) -> Parser<A> {
-    return Parser<A> { _ in a }
+func always<I, A>(_ a: A) -> Parser<I, A> {
+    return Parser<I, A> { _ in .success(a) }
 }
 
 always("cat").run("dog")
 
-func never<A>() -> Parser<A> {
-    return Parser<A> { _ in nil }
+func never<I, A>() -> Parser<I, A> {
+    return Parser<I, A> { _ in .failure("never") }
 }
 
 extension Parser {
     static var never: Parser {
-        return Parser { _ in nil }
+        return Parser { _ in .failure("never") }
     }
 }
 
-Parser<Int>.never.run("dog")
+Parser<Substring, Int>.never.run("dog")
 
 // 40.6782° N, 73.9442° W
 
-let northSouth = Parser<Double> { str in
+let northSouth = Parser<Substring, Double> { str in
     guard
         let cardinal = str.first,
         cardinal == "N" || cardinal == "S"
-    else { return nil }
+    else { return .failure("No N or S as first character") }
     str.removeFirst(1)
-    return cardinal == "N" ? 1 : -1
+    return .success(cardinal == "N" ? 1 : -1)
 }
 
-let eastWest = Parser<Double> { str in
+let eastWest = Parser<Substring, Double> { str in
     guard
         let cardinal = str.first,
         cardinal == "E" || cardinal == "W"
-        else { return nil }
+    else { return .failure("No E or W as first character") }
     str.removeFirst(1)
-    return cardinal == "E" ? 1 : -1
+    return .success(cardinal == "E" ? 1 : -1)
 }
 
 func parseLatLong(_ str: String) -> Coordinate? {
     var str = str[...]
     guard
-        let lat = double.run(&str),
-        literal("° ").run(&str) != nil,
-        let latSign = northSouth.run(&str),
-        literal(", ").run(&str) != nil,
-        let long = double.run(&str),
-        literal("° ").run(&str) != nil,
-        let longSign = eastWest.run(&str)
+        case let .success(lat) = double.run(&str),
+        case .success = literal("° ").run(&str),
+        case let .success(latSign) = northSouth.run(&str),
+        case .success = literal(", ").run(&str),
+        case let .success(long) = double.run(&str),
+        case .success = literal("° ").run(&str),
+        case let .success(longSign) = eastWest.run(&str)
     else { return nil }
     return Coordinate(
         latitude: lat * latSign,
@@ -126,7 +129,7 @@ func parseLatLong(_ str: String) -> Coordinate? {
 //    )
 }
 
-print(parseLatLong("40.6782° N, 73.9442° W"))
+print(parseLatLong("40.6782° N, 73.9442° W")!)
 
 /*
  
@@ -138,69 +141,69 @@ print(parseLatLong("40.6782° N, 73.9442° W"))
  
  */
 
-extension Parser where A == Int {
+extension Parser where I == Substring, A == Int {
 
     static var int: Parser = Parser { str in
         let prefix = str.prefix(while: {
             $0.isNumber || $0 == "-"
         })
-        guard let int = Int(prefix) else { return nil }
+        guard let int = Int(prefix) else { return .failure("Int.init niled") }
         str.removeFirst(prefix.count)
-        return int
+        return .success(int)
     }
 }
 
-extension Parser where A == Double {
+extension Parser where I == Substring, A == Double {
     
     static var double: Parser = Parser { str in
         let prefix = str.prefix(while: {
             $0.isNumber || "-+.eExXnNaA()iIfFtTyY".contains($0)
         })
-        guard let double = Double(prefix) else { return nil }
+        guard let double = Double(prefix) else { return .failure("Double.init niled") }
         str.removeFirst(prefix.count)
-        return double
+        return .success(double)
     }
 }
 
-extension Parser where A == Void {
+extension Parser where I == Substring, A == Void {
 
-    static func literal(_ string: String) -> Parser<Void> {
-        return Parser<Void> { str in
-            guard str.hasPrefix(string) else { return nil }
+    static func literal(_ string: String) -> Parser<Substring, Void> {
+        return Parser<Substring, Void> { str in
+            guard str.hasPrefix(string) else { return .failure("No prefix found") }
             str.removeFirst(string.count)
-            return ()
+            return .success(())
         }
     }
 }
 
 extension Parser {
 
-    static func always<A>(_ a: A) -> Parser<A> {
-        return Parser<A> { _ in a }
+    static func always(_ a: A) -> Parser {
+        return Parser { _ in .success(a) }
     }
 }
 
-extension Parser where A == Double {
+extension Parser where I == Substring, A == Double {
     
     static var northSouth: Parser = Parser { str in
         guard
             let cardinal = str.first,
             cardinal == "N" || cardinal == "S"
-            else { return nil }
+            else { return .failure("No N or S as first character") }
         str.removeFirst(1)
-        return cardinal == "N" ? 1 : -1
+        return .success(cardinal == "N" ? 1 : -1)
     }
 }
 
-extension Parser where A == Double {
+extension Parser where I == Substring, A == Double {
     
     static var eastWest: Parser = Parser { str in
         guard
             let cardinal = str.first,
             cardinal == "E" || cardinal == "W"
-            else { return nil }
+        else { return .failure("No E or W as first character") }
         str.removeFirst(1)
-        return cardinal == "E" ? 1 : -1
+        return .success(cardinal == "E" ? 1 : -1)
     }
 }
 
@@ -215,41 +218,43 @@ extension Parser where A == Double {
  */
 
 extension Parser {
-    func map<B>(_ f: @escaping (A) -> B) -> Parser<B> {
-        return Parser<B> { str in
-            guard let match = self.run(&str) else {
-                return nil
-            }
-            return f(match)
+    func map<B>(_ f: @escaping (A) -> B) -> Parser<I, B> {
+        return Parser<I, B> { str in
+            return self.run(&str).map(f)
         }
     }
 }
 
 print(
-    Parser<Int>.int.map { "found: \($0)" }.run("a 42 asd")
+    Parser<Substring, Int>.int.map { "found: \($0)" }.run("a 42 asd")
 )
 
 // I have two ideas for zip. The one that applies parsing "serially" and the one that applies it "concurently"
 
 // First, serial one
 
-func zip<A, B, C>(
+func zip<I, A, B, C>(
     with f: @escaping (A, B) -> C
-) -> (Parser<A>, Parser<B>) -> Parser<C> {
+) -> (Parser<I, A>, Parser<I, B>) -> Parser<I, C> {
     return { parserA, parserB in
-        return Parser<C> { str in
+        return Parser<I, C> { str in
             var copyStr = str
-            guard let matchA = parserA.run(&copyStr) else { return nil }
-            guard let matchB = parserB.run(&copyStr) else { return nil }
-            str = copyStr
-            return f(matchA, matchB)
+            let result = zip(with: f)(
+                parserA.run(&copyStr),
+                parserB.run(&copyStr)
+            )
+            switch result {
+            case .success: str = copyStr
+            default: break
+            }
+            return result
         }
     }
 }
 
 let zippedParser = zip(with: { (int: Int, double: Double) -> String in
     "int: \(int), double: \(double)"
-})(Parser<Int>.int, Parser<Double>.double)
+})(Parser<Substring, Int>.int, Parser<Substring, Double>.double)
 
 zippedParser.run("4242.01 asd")
 
@@ -257,22 +262,27 @@ zippedParser.run("4242.01 asd")
 
 func zipC<A, B, C>(
     with f: @escaping (A, B) -> C
-    ) -> (Parser<A>, Parser<B>) -> Parser<C> {
+    ) -> (Parser<Substring, A>, Parser<Substring, B>) -> Parser<Substring, C> {
     return { parserA, parserB in
-        return Parser<C> { str in
+        return Parser<Substring, C> { str in
             var copyStrA = str
             var copyStrB = str
-            guard let matchA = parserA.run(&copyStrA) else { return nil }
-            guard let matchB = parserB.run(&copyStrB) else { return nil }
-            str = copyStrA.count <= copyStrB.count ? copyStrA : copyStrB
-            return f(matchA, matchB)
+            let result = zip(with: f)(
+                parserA.run(&copyStrA),
+                parserB.run(&copyStrB)
+            )
+            switch result {
+            case .success: str = copyStrA.count <= copyStrB.count ? copyStrA : copyStrB
+            default: break
+            }
+            return result
         }
     }
 }
 
 let zippedCParser = zipC(with: { (int: Int, double: Double) -> String in
     "int: \(int), double: \(double)"
-})(Parser<Int>.int, Parser<Double>.double)
+})(Parser<Substring, Int>.int, Parser<Substring, Double>.double)
 
 zippedCParser.run("4242.01 asd")
 
@@ -280,11 +290,12 @@ zippedCParser.run("4242.01 asd")
 
 extension Parser {
     
-    func flatMap<B>(_ f: @escaping (A) -> Parser<B>) -> Parser<B> {
-        return Parser<B> { str in
-            guard let match = self.run(&str) else { return nil }
-            let parserB = f(match)
-            return parserB.run(&str)
+    func flatMap<B>(_ f: @escaping (A) -> Parser<I, B>) -> Parser<I, B> {
+        return Parser<I, B> { str in
+            switch self.run(&str) {
+            case .success(let match): return f(match).run(&str)
+            case .failure(let error): return .failure(error)
+            }
         }
     }
 }
@@ -301,11 +312,11 @@ Parser.literal("asd")
  
  */
 
-extension Parser where A == Void {
+extension Parser where I == Substring, A == Void {
     
     static var end: Parser = Parser { str in
-        guard str.isEmpty else { return nil }
-        return ()
+        guard str.isEmpty else { return .failure("Not empty") }
+        return .success(())
     }
 }
 
@@ -320,19 +331,19 @@ Parser.end.run("")
  
  */
 
-extension Parser where A == Substring {
-    static func pred(_ f: @escaping (Character) -> Bool) -> Parser<Substring> {
-        return Parser<Substring> { str in
+extension Parser where I == Substring, A == Substring {
+    static func pred(_ f: @escaping (Character) -> Bool) -> Parser<Substring, Substring> {
+        return Parser<Substring, Substring> { str in
             let satisfying = str.prefix(while: f)
-            guard !satisfying.isEmpty else { return nil }
+            guard !satisfying.isEmpty else { return .failure("No prefix") }
             str.removeFirst(satisfying.count)
-            return satisfying
+            return .success(satisfying)
         }
     }
 }
 
 print(
-    Parser<Substring>.pred({ $0.isNumber })
+    Parser<Substring, Substring>.pred({ $0.isNumber })
         .run("123asd12")
 )
 
@@ -344,14 +355,14 @@ print(
  
  */
 
-func nonConsuming<A>(from: Parser<A>) -> Parser<A> {
-    return Parser<A> { str in
+func nonConsuming<I, A>(from: Parser<I, A>) -> Parser<I, A> {
+    return Parser<I, A> { str in
         var copyStr = str
         return from.run(&copyStr)
     }
 }
 
-nonConsuming(from: Parser<Int>.int)
+nonConsuming(from: Parser<Substring, Int>.int)
     .run("123")
 
 /*
@@ -362,20 +373,29 @@ nonConsuming(from: Parser<Int>.int)
  
  */
 
-func many<A>(from: Parser<A>) -> Parser<[A]> {
-    return Parser<[A]> { str in
+func many<I, A>(from: Parser<I, A>) -> Parser<I, [A]> {
+    return Parser<I, [A]> { str in
         var results = [A]()
-        while let match = from.run(&str) {
+        var result = from.run(&str)
+        while case .success(let match) = result {
             results.append(match)
+            result = from.run(&str)
         }
-        guard !results.isEmpty else { return nil }
-        return results
+        guard !results.isEmpty else {
+            if case .failure(let error) = result {
+                return .failure(error)
+            } else {
+                return .failure("Many did not do anything")
+            }
+        }
+        return .success(results)
     }
 }
 
 many(from: Parser.literal("asd"))
     .run("asdasdasdasd")
-    .match?.count
+    .match
+    .map { $0.count }
 
 
 /*
@@ -386,14 +406,17 @@ many(from: Parser.literal("asd"))
  
  */
 
-func choice<A>(_ parsers: Parser<A>...) -> Parser<A> {
-    return Parser<A> { str in
+func choice<I, A>(_ parsers: Parser<I, A>...) -> Parser<I, A> {
+    return Parser<I, A> { str in
         var result: A? = nil
         _ = parsers.first { parser -> Bool in
-            result = parser.run(&str)
-            return result != nil
+            guard case .success(let value) = parser.run(&str) else {
+                return false
+            }
+            result = value
+            return true
         }
-        return result
+        return result.map { .success($0) } ?? .failure("No parser passed choice")
     }
 }
 
@@ -413,7 +436,19 @@ choice(Parser.literal("asd"), Parser.literal("dsa"), Parser.literal("dsad"))
  
  */
 
+func either<I, A, B>(
+    _ lhs: Parser<I, A>, _ rhs: Parser<I, B>
+) -> Parser<I, Either<A, B>> {
+    return Parser<I, Either<A, B>> { str in
+        switch lhs.run(&str) {
+        case .success(let value): return .success(.left(value))
+        case .failure: return rhs.run(&str).map(Either.right)
+        }
+    }
+}
 
+either(Parser.literal("asd"), Parser<Substring, Int>.int)
+    .run("123")
 
 /*
 
@@ -423,7 +458,24 @@ choice(Parser.literal("asd"), Parser.literal("dsa"), Parser.literal("dsad"))
  
  */
 
+func keep<I, A, B>(_ parserA: Parser<I, A>, discard parserB: Parser<I, B>) -> Parser<I, A> {
+    return Parser<I, A> { str in
+        var copyStr = str
+        switch parserA.run(&copyStr) {
+        case .failure(let error): return .failure(error)
+        case .success(let value):
+            switch parserB.run(&copyStr) {
+            case .failure(let error): return .failure(error)
+            case .success:
+                str = copyStr
+                return .success(value)
+            }
+        }
+    }
+}
 
+keep(Parser.literal("asd"), discard: Parser.literal("dsa"))
+    .run("asddsaasd")
 
 /*
 
@@ -433,8 +485,24 @@ choice(Parser.literal("asd"), Parser.literal("dsa"), Parser.literal("dsad"))
  
  */
 
+func discard<I, A, B>(_ parserA: Parser<I, A>, keep parserB: Parser<I, B>) -> Parser<I, B> {
+    return Parser<I, B> { str in
+        var copyStr = str
+        switch parserA.run(&copyStr) {
+        case .failure(let error): return .failure(error)
+        case .success:
+            switch parserB.run(&copyStr) {
+            case .failure(let error): return .failure(error)
+            case .success(let value):
+                str = copyStr
+                return .success(value)
+            }
+        }
+    }
+}
 
-
+keep(Parser.literal("asd"), discard: Parser.literal("dsa"))
+    .run("asddsaasd")
 /*
 
  Exercise 11.
@@ -443,7 +511,17 @@ choice(Parser.literal("asd"), Parser.literal("dsa"), Parser.literal("dsad"))
  
  */
 
+func choose<I, A>(_ parserA: Parser<I, A>, _ parserB: Parser<I, A>) -> Parser<I, A> {
+    return Parser<I, A> { str in
+        switch parserA.run(&str) {
+        case .success(let value): return .success(value)
+        case .failure: return parserB.run(&str)
+        }
+    }
+}
 
+choose(Parser.literal("aasd"), Parser.literal("asdasd"))
+    .run("asdasdasd")
 
 /*
 
@@ -453,7 +531,25 @@ choice(Parser.literal("asd"), Parser.literal("dsa"), Parser.literal("dsad"))
  
  */
 
+// it's the same as choice defined above
 
+func choose<I, A>(_ parsers: [Parser<I, A>]) -> Parser<I, A> {
+    return Parser<I, A> { str in
+        var result: A? = nil
+        _ = parsers.first { parser -> Bool in
+            guard case .success(let value) = parser.run(&str) else {
+                return false
+            }
+            result = value
+            return true
+        }
+        return result.map { .success($0) } ?? .failure("No parser passed choice")
+    }
+}
+
+choose([
+    Parser.literal("asd"), Parser.literal("qwe"), Parser.literal("zxc")
+]).run("zxczxc")
 
 /*
 
@@ -465,7 +561,7 @@ choice(Parser.literal("asd"), Parser.literal("dsa"), Parser.literal("dsad"))
  
  */
 
-
+// DONE
 
 /*
 
@@ -477,6 +573,6 @@ choice(Parser.literal("asd"), Parser.literal("dsa"), Parser.literal("dsad"))
  
  */
 
-
+// DONE
 
 //: [Next](@next)

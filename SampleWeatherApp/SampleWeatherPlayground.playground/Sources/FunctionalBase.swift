@@ -13,6 +13,32 @@ public enum Either<A, B> {
 public enum Result<Value, Error> {
     case success(Value)
     case failure(Error)
+    
+    public func map<B>(_ f: @escaping (Value) -> B) -> Result<B, Error> {
+        switch self {
+        case let .success(a): return .success(f(a))
+        case let .failure(e): return .failure(e)
+        }
+    }
+    
+    public func flatMap<B>(_ f: @escaping (Value) -> Result<B, Error>) -> Result<B, Error> {
+        switch self {
+        case .success(let a): return f(a)
+        case .failure(let e): return .failure(e)
+        }
+    }
+}
+
+public func zip<A, B, C, E>(
+    with combine: @escaping (A, B) -> C
+) -> (_ l: Result<A, E>, _ r: Result<B, E>) -> Result<C, E> {
+    return { l, r in
+        return l.flatMap { a in
+            return r.map { b in
+                return combine(a, b)
+            }
+        }
+    }
 }
 
 public func curry<A, B, C>(_ f: @escaping (A, B) -> C) -> (A) -> (B) -> C {
