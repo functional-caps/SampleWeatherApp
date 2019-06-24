@@ -292,8 +292,16 @@ extension Parser {
     
     func flatMap<B>(_ f: @escaping (A) -> Parser<I, B>) -> Parser<I, B> {
         return Parser<I, B> { str in
-            switch self.run(&str) {
-            case .success(let match): return f(match).run(&str)
+            var copyStr = str
+            switch self.run(&copyStr) {
+            case .success(let match):
+                switch f(match).run(&copyStr) {
+                case .success(let value):
+                    str = copyStr
+                    return .success(value)
+                case .failure(let error):
+                    return .failure(error)
+                }
             case .failure(let error): return .failure(error)
             }
         }
