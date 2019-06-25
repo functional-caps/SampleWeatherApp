@@ -62,5 +62,6 @@
         <page name='58. What Is a Parser? — Part 3'/>
         <page name='59. Composable Parsing — Map'/>
         <page name='60. Composable Parsing — FlatMap'/>
+        <page name='61. Composable Parsing — Zip'/>
     </pages>
 </playground>
