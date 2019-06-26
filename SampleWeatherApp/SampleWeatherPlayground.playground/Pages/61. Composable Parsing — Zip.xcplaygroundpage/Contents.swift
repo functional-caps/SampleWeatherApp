@@ -483,7 +483,21 @@ iso.run("2018-01-29T12:34:56Z")
  
  */
 
+let oneOrMoreSpaces: GenericParser<Substring, Substring> = .init { str in
+    var copyStr = str
+    guard !copyStr.isEmpty else { return .failure("must not be empty") }
+    let first = copyStr.removeFirst()
+    guard first.isWhitespace else { return .failure("no spaces at all") }
+    let prefix = str.prefix(while: { $0.isWhitespace })
+    str.removeFirst(prefix.count)
+    return .success(prefix)
+}
 
+oneOrMoreSpaces.run("asd")
+oneOrMoreSpaces.run(" asd")
+oneOrMoreSpaces.run("      asd")
+
+// it cannot be defined using map, flatMap or zip because it's recursive. it's output should be fed to its input. the map, flatMap and zip are linear operations
 
 /*
  
@@ -493,7 +507,17 @@ iso.run("2018-01-29T12:34:56Z")
  
  */
 
+let zeroOrMoreSpaces: GenericParser<Substring, Substring> = .init { str in
+    let prefix = str.prefix(while: { $0.isWhitespace })
+    str.removeFirst(prefix.count)
+    return .success(prefix)
+}
 
+zeroOrMoreSpaces.run("asd")
+zeroOrMoreSpaces.run(" asd")
+zeroOrMoreSpaces.run("      asd")
+
+// the main difference is that the zeroOrMoreSpaces is always succeeding, because there is always at least zero whitespaces at the beginning of the string
 
 /*
  
@@ -503,7 +527,30 @@ iso.run("2018-01-29T12:34:56Z")
  
  */
 
+func filter(_ f: @escaping (Character) -> Bool) -> GenericParser<Substring, Substring> {
+    return GenericParser<Substring, Substring> { str in
+        let prefix = str.prefix(while: f)
+        str.removeFirst(prefix.count)
+        return .success(prefix)
+    }
+}
 
+let zeroOrMoreSpaces2 = filter { $0.isWhitespace }
+zeroOrMoreSpaces2.run("asd")
+zeroOrMoreSpaces2.run(" asd")
+zeroOrMoreSpaces2.run("      asd")
+
+let oneOrMoreSpaces2 = GenericParser<Substring, Substring> { str in
+    guard let first = str.first, first.isWhitespace
+    else { return .failure("must have at least one whitespace character at the front") }
+    return .success(str)
+}.flatMap { _ in
+    filter { $0.isWhitespace }
+}
+
+oneOrMoreSpaces2.run("asd")
+oneOrMoreSpaces2.run(" asd")
+oneOrMoreSpaces2.run("      asd")
 
 /*
  
@@ -513,6 +560,15 @@ iso.run("2018-01-29T12:34:56Z")
  
  */
 
+func zip7<I, A, B>(_ a: GenericParser<I, A>, _ b: GenericParser<I, B>) -> GenericParser<I, (A, B)> {
+    return a.flatMap { valA in
+        b.map { valB in
+            (valA, valB)
+        }
+    }
+}
 
+let money7 = zip7(currency, double).map(Money.init)
+print(money7.run("$10"))
 
 //: [Next](@next)

@@ -63,5 +63,6 @@
         <page name='59. Composable Parsing — Map'/>
         <page name='60. Composable Parsing — FlatMap'/>
         <page name='61. Composable Parsing — Zip'/>
+        <page name='62. Parser Combinators — Part 1'/>
     </pages>
 </playground>
