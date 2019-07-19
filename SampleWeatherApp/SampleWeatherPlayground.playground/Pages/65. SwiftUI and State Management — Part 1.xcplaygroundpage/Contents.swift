@@ -76,9 +76,31 @@
 import Foundation
 import SwiftUI
 
+//Right now it’s cumbersome to add new state to our AppState class. We have to always remember to ping didChange whenever any of our fields is mutated and even more work is needed if we wanted to bundle up a bunch of fields into its own state class.
+//
+//These problems can be fixed by creating a generic class Store<A> that wraps access to a single value type A. Implement this class and replace all instances of AppState in our application with Store<AppState>.
+
+class Store<A>: BindableObject where A: Codable {
+    
+    var didChange = PassthroughSubject<Void, Never>()
+    
+    var value: A
+    
+    init(a: A) {
+        self.value = a
+    }
+    
+    private func saveAndSend() {
+        didChange.send()
+        let data = try! JSONEncoder().encode(self.value)
+        UserDefaults.standard.set(data, forKey: "AppState")
+    }
+    
+}
+
 struct ContentView: View {
     
-    @ObjectBinding var state: AppState
+    @ObjectBinding var state: Store<AppState>
     
     var body: some View {
         NavigationView {
@@ -102,52 +124,102 @@ private func ordinal(_ n: Int) -> String {
 
 import Combine
 
-class AppState: BindableObject, Codable {
+func isPrime(_ n: Int) -> Bool {
+    if n <= 3 {
+        return n > 1
+    } else if n % 2 == 0 || n % 3 == 0 {
+        return false
+    }
+    var i = 5
+    while i * i <= n {
+        if n % i == 0 || n % (i + 2) == 0 {
+            return false
+        }
+        i += 6
+    }
+    return true
+}
+
+class AppState: Codable {
     
     enum CodingKeys: CodingKey {
         case count
     }
     
-    var count: Int = 0 {
-        didSet {
-            self.didChange.send()
-            let data = try! JSONEncoder().encode(self)
-            UserDefaults.standard.set(data, forKey: "AppState.count")
-        }
-    }
+    var count: Int = 0
     
-    var didChange = PassthroughSubject<Void, Never>()
+    var countColor: Color { isPrime(count) ? .green : .red }
+    
+    var favoritePrimes: [Int] = []
     
     static func read(from data: Data?) -> AppState {
         return data.flatMap { try? JSONDecoder().decode(AppState.self, from: $0) } ?? AppState()
     }
 }
 
+// Use this new favoritePrimes state to render a “Add to favorite primes” / “Remove from favorite primes” button in the modal. Also hook up the action on this button to remove or add the current counter value to the list of favorite primes.
+
+struct IsThisModalView: View {
+    
+    @ObjectBinding var state: Store<AppState>
+    
+    var actionOnButton: () -> Void
+    
+    var body: some View {
+        VStack {
+            Button(action: actionOnButton) {
+                Text("Dismiss me")
+            }
+            if isPrime(self.state.value.count) {
+                Text("Yes, \(self.state.value.count) is prime!")
+                if self.state.value.favoritePrimes.contains(self.state.value.count) {
+                    Button(action: {
+                        if let index = self.state.value.favoritePrimes.firstIndex(of: self.state.value.count) {
+                            self.state.value.favoritePrimes.remove(at: index)
+                        }
+                    }) {
+                        Text("Remove from favourites")
+                    }
+                } else {
+                    Button(action: { self.state.value.favoritePrimes.append(self.state.value.count) }) {
+                        Text("Add to favourites")
+                    }
+                }
+            } else {
+                Text("No, \(self.state.value.count) is not prime...")
+            }
+        }
+    }
+}
+
 struct CounterView: View {
     
-    @ObjectBinding var state: AppState
+    @ObjectBinding var state: Store<AppState>
+    
+    @State var modal: Modal?
     
     var body: some View {
         VStack {
             HStack {
-                Button(action: { self.state.count -= 1 }) {
+                Button(action: { self.state.value.count -= 1 }) {
                     Text("-")
                 }
-                
-                Text("\(self.state.count)")
-                Button(action: { self.state.count += 1 }) {
+                Text("\(self.state.value.count)")
+                    .color(self.state.value.countColor)
+                Button(action: { self.state.value.count += 1 }) {
                     Text("+")
                 }
             }
-            Button(action: { }) {
+            Button(action: { self.modal = Modal(IsThisModalView(state: self.state) { self.modal = nil }) }) {
                 Text("Is this prime?")
             }
-            Button(action: {}) {
-                Text("What is \(ordinal(self.state.count)) prime?")
+            Button(action: {  }) {
+                Text("What is \(ordinal(self.state.value.count)) prime?")
             }
         }
         .font(.title)
-            .navigationBarTitle("Counter demo")
+        .navigationBarTitle("Counter demo")
+        .presentation(modal)
         
     }
 }
@@ -156,7 +228,7 @@ import PlaygroundSupport
 
 PlaygroundPage.current.liveView = UIHostingController(rootView:
     ContentView(state:
-        AppState.read(from: UserDefaults.standard.data(forKey: "AppState.count"))
+        Store(a: AppState.read(from: UserDefaults.standard.data(forKey: "AppState")))
     )
 )
 
@@ -198,21 +270,7 @@ PlaygroundPage.current.liveView = UIHostingController(rootView:
 //        i ← i + 6
 //    return true
 
-func isPrime(_ n: Int) -> Bool {
-    if n <= 3 {
-        return n > 1
-    } else if n % 2 == 0 || n % 3 == 0 {
-        return false
-    }
-    var i = 5
-    while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 {
-            return false
-        }
-        i += 6
-    }
-    return true
-}
+// moved above
 
 isPrime(0)
 isPrime(1)
@@ -237,7 +295,7 @@ isPrime(32)
  
  */
 
-
+// Done in the app
 
 /*
 
@@ -249,8 +307,7 @@ isPrime(32)
  
  */
 
-
-
+// Done in the app
 
 /*
 
@@ -262,8 +319,7 @@ isPrime(32)
  
  */
 
-
-
+// Done in the app
 
 /*
  
@@ -275,9 +331,7 @@ isPrime(32)
  
  */
 
-
-
-
+// Done in the app
 
 
 //: [Next](@next)
